@@ -6,7 +6,7 @@ import Expr;
 
 class Parser extends scripting.haxe.ScriptBasic
 {
-    public final tokens:Token;
+    public final tokens:Array<Token>;
     
     public function new(tokens:Array<Token>)
     {
@@ -27,6 +27,11 @@ class Parser extends scripting.haxe.ScriptBasic
         return tokens[pos - 1];
     }
 
+    function peekNext():Token
+    {
+        return tokens[pos + 1];
+    }
+
     function advance():Token
     {
         return tokens[pos++];
@@ -43,24 +48,68 @@ class Parser extends scripting.haxe.ScriptBasic
 
         while (pos < tokens.length)
         {
-            switch (peek())
-            {
-                case TIdent(id):
-                    switch (id)
-                    {
-                        case 'var':
-                            result.push(parseVar());
-                        case 'return':
-                            result.push(parseReturn());
-                        default:
-                            pos++;
-                    }
-                default:
-                    pos++;
-            }
+            final statement:Stmt = parseStatement();
+
+            if (statement != null)
+                result.push(statement);
         }
         
         return result;
+    }
+
+    function parseStatement():Stmt
+    {
+        return switch (peek())
+        {
+            case TIdent(id):
+                switch (id)
+                {
+                    case 'var':
+                        parseVar();
+                    case 'return':
+                        parseReturn();
+                    default:
+                        switch (peekNext())
+                        {
+                            case TEqual:                                
+                                parseAssign();
+                            default:
+                                pos++;
+
+                                null;
+                        }
+                }
+            case TLBrace:
+                parseBlock();
+            default:
+                pos++;
+
+                null;
+        }
+    }
+
+    function parseBlock():Stmt
+    {
+        advance();
+
+        final result:Array<Stmt> = [];
+
+        while (pos < tokens.length && switch (peek()) {case TRBrace: false; default: true;})
+        {
+            final statement:Stmt = parseStatement();
+
+            if (statement != null)
+                result.push(statement);
+        }
+
+        switch (advance())
+        {
+            case TRBrace:
+            default:
+                tokenError();
+        }
+
+        return Stmt.SBlock(result);
     }
 
     function parseVar()
@@ -72,7 +121,7 @@ class Parser extends scripting.haxe.ScriptBasic
             case TIdent(id):
                 id;
             default:
-                throw '';
+                tokenError();
         };
 
         switch (advance())
@@ -81,7 +130,13 @@ class Parser extends scripting.haxe.ScriptBasic
                 switch (advance())
                 {
                     case TIdent(id):
-                        advance();
+                    default:
+                        tokenError();
+                }
+
+                switch (advance())
+                {
+                    case TEqual:
                     default:
                         tokenError();
                 }
@@ -95,6 +150,21 @@ class Parser extends scripting.haxe.ScriptBasic
         advance();
 
         return Stmt.SVar(name, value);
+    }
+
+    function parseAssign():Stmt
+    {
+        final name:String = switch (advance())
+        {
+            case TIdent(id):
+                id;
+            default:
+                null;
+        }
+
+        advance();
+
+        return Stmt.SAssign(name, parseExpr());
     }
 
     function parseReturn():Stmt

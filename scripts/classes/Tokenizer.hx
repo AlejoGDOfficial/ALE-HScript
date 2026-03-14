@@ -86,6 +86,14 @@ class Tokenizer extends scripting.haxe.ScriptBasic
                     advance();
 
                     result.push(Token.TRParen);
+                case '{':
+                    advance();
+
+                    result.push(Token.TLBrace);
+                case '}':
+                    advance();
+
+                    result.push(Token.TRBrace);
                 case '+', '-', '*', '/', '%':
                     result.push(Token.TOp(advance()));
                 case ':':

@@ -2,8 +2,11 @@ package;
 
 enum Expr
 {
-    EString(value:String);
-    EVar(name:String);
     ENumber(num:Float);
-    EBinary(left:Float, op:String, right:Float);
+    EString(value:String);
+
+    EVar(name:String);
+    EAssign(name:String, value:Expr);
+
+    EBinary(left:Expr, op:String, right:Expr);
 }

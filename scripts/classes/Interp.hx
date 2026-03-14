@@ -4,20 +4,59 @@ import haxe.ds.StringMap;
 
 class Interp extends scripting.haxe.ScriptBasic
 {
-    public var variables:StringMap<Dynamic> = new StringMap();
+    var scope:Scope = new Scope();
 
     public function execute(ast:Array<Stmt>):Dynamic
     {
         for (stmt in ast)
         {
-            switch (stmt)
+            final result:Dynamic = executeStatement(stmt);
+
+            if (result != null)
+                return result;
+        }
+
+        return null;
+    }
+
+    function executeStatement(stmt:Stmt):Dynamic
+    {
+        return switch (stmt)
+        {
+            case SVar(name, value):
+                scope.define(name, eval(value));
+
+                null;
+            case SAssign(name, value):
+                scope.assign(name, eval(value));
+
+                null;
+            case SReturn(expr):
+                eval(expr);
+            case SBlock(stmts):
+                executeBlock(stmts);
+        }
+    }
+
+    function executeBlock(statements:Array<Stmt>):Dynamic
+    {
+        final previous:Scope = scope;
+
+        scope = new Scope(scope);
+
+        for (stmt in statements)
+        {
+            final result:Dynamic = executeStatement(stmt);
+
+            if (result != null)
             {
-                case SVar(name, value):
-                    variables.set(name, eval(value));
-                case SReturn(value):
-                    return eval(value);
+                scope = previous;
+
+                return result;
             }
         }
+
+        scope = previous;
 
         return null;
     }
@@ -29,7 +68,7 @@ class Interp extends scripting.haxe.ScriptBasic
             case EString(str):
                 str;
             case EVar(name):
-                variables.get(name);
+                scope.get(name);
             case ENumber(num):
                 num;
             case EBinary(left, op, right):

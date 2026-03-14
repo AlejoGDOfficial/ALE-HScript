@@ -3,12 +3,19 @@ package;
 enum Token
 {
     TIdent(id:String);
+
+    TEqual;
+
     TString(id:String);
     TNumber(value:Float);
-    TOp(op:String);
+
     TLParen;
     TRParen;
+    TOp(op:String);
+
+    TLBrace;
+    TRBrace;
+    
     TSemiColon;
-    TEqual;
     TColon;
 }
