@@ -262,7 +262,15 @@ class Parser extends scripting.haxe.ScriptBasic
             switch (peek())
             {
                 case TDot:
+                    advance();
 
+                    switch (advance())
+                    {
+                        case TIdent(name):
+                            expr = Expr.EProperty(expr, name);
+                        default:
+                            error();
+                    }
                 default:
                     return expr;
             }

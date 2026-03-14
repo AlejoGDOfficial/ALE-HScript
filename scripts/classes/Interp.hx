@@ -29,6 +29,19 @@ class Interp extends scripting.haxe.ScriptBasic
         return null;
     }
 
+    function setProperty(expr:Expr, value:Dynamic):Void
+    {
+        switch (expr)
+        {
+            case EVar(name):
+                scope.assign(name, value);
+            case EProperty(objExpr, property):
+                Reflect.setProperty(evaluate(objExpr), property, value);
+            default:
+                error();
+        }
+    }
+
     function executeStatement(statement:Stmt):Dynamic
     {
         return switch (statement)
@@ -38,7 +51,13 @@ class Interp extends scripting.haxe.ScriptBasic
 
                 null;
             case SAssign(name, val):
-                scope.assign(name, evaluate(val));
+                switch (val)
+                {
+                    case EProperty(_, __):
+                        setProperty(val, evaluate(val));
+                    default:
+                        scope.assign(name, evaluate(val));
+                }
                 
                 null;
             case SReturn(val):
@@ -82,6 +101,8 @@ class Interp extends scripting.haxe.ScriptBasic
                 num;
             case EVar(name):
                 scope.get(name);
+            case EProperty(name, property):
+                Reflect.getProperty(evaluate(name), property);
             case EBinOp(left, op, right):
                 final l = evaluate(left);
 
