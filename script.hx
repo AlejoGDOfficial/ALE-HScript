@@ -1,3 +1,3 @@
-var oso:String = 'oso';
+var oso:String = 'pedrito';
 
 return oso;

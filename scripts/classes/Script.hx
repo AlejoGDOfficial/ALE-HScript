@@ -8,15 +8,15 @@ class Script extends scripting.haxe.ScriptBasic
     {
         super();
         
-        //this.interp = new Interp();
+        this.interp = new Interp();
     }
     
-    public function execute(content:String)
+    public function execute(content:String):Dynamic
     {
         final tokens:Array<Token> = new Tokenizer(content).tokenize();
     
         final ast:Array<Stmt> = new Parser(tokens).parse();
         
-        debugTrace(ast);
+        return interp.execute(ast);
     }
 }

@@ -1,6 +1,6 @@
 package;
 
-CoolUtil.resizeGame(500, 500);
+CoolUtil.resizeGame(500, 500, false);
 
 MobileAPI.setOrientation('portrait');
 
@@ -19,5 +19,6 @@ function onCreate()
     final content = Paths.getContent('script.hx');
     
     var script:Script = new Script();
-    script.execute(content);
+
+    debugTrace(script.execute(content));
 }

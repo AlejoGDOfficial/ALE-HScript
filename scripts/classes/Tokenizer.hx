@@ -5,65 +5,102 @@ import Token;
 class Tokenizer extends scripting.haxe.ScriptBasic
 {
     final identReg:EReg = ~/^[A-Za-z_][A-Za-z0-9_]*$/;
-    final spaceReg = ~/\s+/;
     
-    public function tokenize(content:String):Array<Token>
+    final spaceReg = ~/\s+/;
+
+    public final content:String;
+
+    var pos:Int = 0;
+
+    public function new(content:String)
     {
-        final result:Array<Token> = [];
-        
-        var index:Int = 0;
-        
-        while (index < content.length)
+        super();
+
+        this.content = content;
+    }
+
+    inline function isEnd():Bool
+    {
+        return pos >= content.length;
+    }
+
+    inline function peek():String
+    {
+        return content.charAt(pos);
+    }
+
+    inline function advance():String
+    {
+        return content.charAt(pos++);
+    }
+
+    function readIdent():String
+    {
+        var str = '';
+
+        while (!isEnd() && identReg.match(peek()))
+            str += advance();
+
+        return str;
+    }
+
+    function readString():String
+    {
+        var str = '';
+
+        advance();
+
+        while (!isEnd() && peek() != '\'')
+            str += advance();
+
+        advance();
+
+        return str;
+    }
+
+    public function tokenize():Array<Token>
+    {
+        var result:Array<Token> = [];
+
+        while (!isEnd())
         {
-            var cur:String = content.charAt(index);
-            
+            var cur = peek();
+
             switch (cur)
             {
                 case ':':
-                    index++;
-                    
+                    advance();
+
                     result.push(Token.TColon);
-                
-                    continue;
+
                 case ';':
-                    index++;
-                    
+                    advance();
+
                     result.push(Token.TSemiColon);
-                    
-                    continue;
+
+                case '=':
+                    advance();
+
+                    result.push(Token.TEqual);
+
+                case '\'', '"':
+                    result.push(Token.TString(readString()));
+
                 default:
+                    if (spaceReg.match(cur))
+                    {
+                        advance();
+
+                        continue;
+                    }
+
+                    if (identReg.match(cur))
+                        result.push(Token.TIdent(readIdent()));
+                    else
+                        advance();
             }
-            
-            if (spaceReg.match(cur))
-            {
-                index++;
-                
-                continue;
-            } else if (identReg.match(cur)) {
-                final string:String = cur;
-                
-                while (index < content.length && identReg.match(content.charAt(++index)))
-                    string += content.charAt(index);
-                
-                result.push(Token.TIdent(string));
-                
-                continue;
-            } else if (cur == '\'') {
-                final string:String = '';
-                
-                while (index < content.length && content.charAt(++index) != '\'')
-                    string += content.charAt(index);
-                
-                index++;
-            
-                result.push(Token.TString(string));
-                
-                continue;
-            }
-            
-            index++;
         }
-        
+
         return result;
     }
 }
