@@ -234,7 +234,7 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function parsePrimary():Expr
     {
-        return switch (advance())
+        var expr:Expr = switch (advance())
         {
             case TString(str):
                 Expr.EString(str);
@@ -256,5 +256,18 @@ class Parser extends scripting.haxe.ScriptBasic
             default:
                 error();
         }
+
+        while (true)
+        {
+            switch (peek())
+            {
+                case TDot:
+
+                default:
+                    return expr;
+            }
+        }
+
+        return expr;
     }
 }

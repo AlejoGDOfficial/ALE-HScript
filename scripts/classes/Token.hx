@@ -16,6 +16,7 @@ enum Token
     TLBrace;
     TRBrace;
     
+    TDot;
     TSemiColon;
     TColon;
 }

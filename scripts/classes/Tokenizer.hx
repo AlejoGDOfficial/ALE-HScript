@@ -78,6 +78,10 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
             switch (cur)
             {
+                case '.':
+                    advance();
+
+                    result.push(Token.TDot);
                 case '(':
                     advance();
 

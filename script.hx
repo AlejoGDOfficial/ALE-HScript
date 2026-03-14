@@ -7,7 +7,7 @@ var str:String = 'oso';
 {
     a = 20;
 
-    var b = 20;
+    b = camGame.position.x;
 }
 
-return a * b + scriptName;
+return a * b;
