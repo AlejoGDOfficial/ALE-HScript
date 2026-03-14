@@ -87,6 +87,12 @@ class Interp extends scripting.haxe.ScriptBasic
     {
         return switch (expr)
         {
+            case ENull:
+                null;
+            case ETrue:
+                true;
+            case EFalse:
+                false;
             case EString(str):
                 str;
             case ENumber(num):

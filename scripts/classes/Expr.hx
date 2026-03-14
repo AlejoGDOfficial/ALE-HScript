@@ -3,6 +3,8 @@ package;
 enum Expr
 {
     ENull;
+    ETrue;
+    EFalse;
 
     ENumber(num:Float);
     EString(value:String);

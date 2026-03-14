@@ -298,7 +298,15 @@ class Parser extends scripting.haxe.ScriptBasic
             case TNumber(num):
                 Expr.ENumber(num);
             case TIdent(id):
-                Expr.EVar(id);
+                switch (id)
+                {
+                    case 'true':
+                        Expr.ETrue;
+                    case 'false':
+                        Expr.EFalse;
+                    default:
+                        Expr.EVar(id);
+                }
             case TLParen:
                 final expr:Expr = parseExpr();
 
