@@ -7,7 +7,7 @@ Nothing complicated.
 * Statement
     * Ident
         * Variable
-            * `var` -> {`:`type} -> {Expr} -> `;`
+            * `var` -> {variable`:`type} -> {Expr} -> `;`
         * Return
             * return -> Expr -> `;`
         * Default

@@ -17,6 +17,21 @@ class Parser extends scripting.haxe.ScriptBasic
 
     var pos:Int = 0;
 
+    function peek():Token
+    {
+        return tokens[pos];
+    }
+
+    function peekLast():Token
+    {
+        return tokens[pos - 1];
+    }
+
+    function peekNext():Token
+    {
+        return tokens[pos + 1];
+    }
+
     function advance():Token
     {
         return tokens[pos++];
@@ -24,7 +39,12 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function isEnd():Bool
     {
-        return pos < tokens.length;
+        return pos >= tokens.length;
+    }
+
+    function error():Bool
+    {
+        throw 'Unexpected Token: ' + peekLast();
     }
 
     function parse()
@@ -48,7 +68,27 @@ class Parser extends scripting.haxe.ScriptBasic
     {
         return switch (advance())
         {
-
+            case TIdent(id):
+                switch (id)
+                {
+                    case 'var':
+                        parseVariable();
+                    default:
+                }
+            default:
         }
+    }
+
+    function parseVariable():Stmt
+    {
+        final name:String = switch (peek())
+        {
+            case TIdent(id):
+                id;
+            default:
+                error();
+        }
+
+        debugTrace(name);
     }
 }
