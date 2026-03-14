@@ -72,9 +72,9 @@ class Interp extends scripting.haxe.ScriptBasic
             case ENumber(num):
                 num;
             case EBinary(left, op, right):
-                final l:Float = eval(left);
+                final l = eval(left);
 
-                final r:Float = eval(right);
+                final r = eval(right);
                 
                 switch (op)
                 {
@@ -88,6 +88,34 @@ class Interp extends scripting.haxe.ScriptBasic
                         l / r;
                     case '%':
                         l % r;
+                    case '==':
+                        l == r;
+                    case '!=':
+                        l != r;
+                    case '>':
+                        l > r;
+                    case '<':
+                        l < r;
+                    case '>=':
+                        l >= r;
+                    case '<=':
+                        l <= r;
+                    case '&&':
+                        l && r;
+                    case '||':
+                        l || r;
+                    case '&':
+                        l & r;
+                    case '|':
+                        l | r;
+                    case '^':
+                        l ^ r;
+                    case '<<':
+                        l << r;
+                    case '>>':
+                        l >> r;
+                    case '>>>':
+                        l >>> r;
                     default:
                         null;
                 }

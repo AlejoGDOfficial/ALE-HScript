@@ -6,6 +6,8 @@ var str:String = 'oso';
 
 {
     a = 20;
+
+    var b = 20;
 }
 
 return a * b + str;
