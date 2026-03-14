@@ -89,6 +89,12 @@ class Parser extends scripting.haxe.ScriptBasic
                 error();
         }
 
-        debugTrace(name);
+        switch (advance())
+        {
+            case :
+
+            default:
+                error();
+        }
     }
 }
