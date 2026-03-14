@@ -203,7 +203,29 @@ class Parser extends scripting.haxe.ScriptBasic
             default:
         }
 
-        return Stmt.SIf(condition, block);
+        var elseBlock:Stmt = null;
+
+        switch (advance())
+        {
+            case TIdent(id):
+                switch (id)
+                {
+                    case 'else':
+                        switch (advance())
+                        {
+                            case TLBrace:
+                                elseBlock = parseBlock();
+                            default:
+                                error();
+                        }
+                    default:
+                }
+            default:
+        }
+
+        debugTrace(elseBlock);
+
+        return Stmt.SIf(condition, block, elseBlock);
     }
 
     function parseProperty(expr:Expr):Expr

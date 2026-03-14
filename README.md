@@ -1,3 +1,11 @@
+# ALE HScript
+
+## This is a modpack for [ALE Psych](https://github.com/ALE-Psych-Crew/ALE-Psych) (for now) If you'd like to try it out, install it there
+
+---
+
+I'm just starting to learn about this, and to avoid relying on AI, I began by taking some notes so I could recreate everything while keeping track of the process involved.
+
 ## Tokenizer
 
 Nothing complicated.
