@@ -1,3 +1,5 @@
-var oso: = 'pedrito';
+var a:Int = 5;
 
-return oso;
+var b = 10;
+
+return 5 + 2 * 2;

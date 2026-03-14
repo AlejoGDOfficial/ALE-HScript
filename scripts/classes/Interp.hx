@@ -30,6 +30,30 @@ class Interp extends scripting.haxe.ScriptBasic
                 str;
             case EVar(name):
                 variables.get(name);
+            case ENumber(num):
+                num;
+            case EBinary(left, op, right):
+                final l:Float = eval(left);
+
+                final r:Float = eval(right);
+                
+                switch (op)
+                {
+                    case '+':
+                        l + r;
+                    case '-':
+                        l - r;
+                    case '*':
+                        l * r;
+                    case '/':
+                        l / r;
+                    case '%':
+                        l % r;
+                    default:
+                        null;
+                }
+            default:
+                null;
         }
     }
 }

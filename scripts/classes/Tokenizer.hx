@@ -5,8 +5,8 @@ import Token;
 class Tokenizer extends scripting.haxe.ScriptBasic
 {
     final identReg:EReg = ~/^[A-Za-z_][A-Za-z0-9_]*$/;
-    
-    final spaceReg = ~/\s+/;
+    final numberReg:EReg = ~/^[0-9.]+$/;
+    final spaceReg:EReg = ~/\s+/;
 
     public final content:String;
 
@@ -36,7 +36,7 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
     function readIdent():String
     {
-        var str = '';
+        final str:String = '';
 
         while (!isEnd() && identReg.match(peek()))
             str += advance();
@@ -46,7 +46,7 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
     function readString():String
     {
-        var str = '';
+        final str:String = '';
 
         advance();
 
@@ -56,6 +56,16 @@ class Tokenizer extends scripting.haxe.ScriptBasic
         advance();
 
         return str;
+    }
+
+    function readNumber():Float
+    {
+        final str:String = '';
+
+        while (!isEnd() && numberReg.match(peek()))
+            str += advance();
+
+        return Std.parseFloat(str);
     }
 
     public function tokenize():Array<Token>
@@ -68,6 +78,16 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
             switch (cur)
             {
+                case '(':
+                    advance();
+
+                    result.push(Token.TLParen);
+                case ')':
+                    advance();
+
+                    result.push(Token.TRParen);
+                case '+', '-', '*', '/', '%':
+                    result.push(Token.TOp(advance()));
                 case ':':
                     advance();
 
@@ -96,6 +116,8 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
                     if (identReg.match(cur))
                         result.push(Token.TIdent(readIdent()));
+                    else if (numberReg.match(cur))
+                        result.push(Token.TNumber(readNumber()));
                     else
                         advance();
             }

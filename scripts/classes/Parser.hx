@@ -87,7 +87,7 @@ class Parser extends scripting.haxe.ScriptBasic
                 }
             case TEqual:
             default:
-                throw tokenError();
+                tokenError();
         }
 
         final value:Expr = parseExpr();
@@ -110,14 +110,82 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function parseExpr():Expr
     {
+        return parseAddSub();
+    }
+
+    function parseAddSub():Expr
+    {
+        var expr:Expr = parseMulDiv();
+
+        while (pos < tokens.length)
+        {
+            switch (peek())
+            {
+                case TOp(op):
+                    if (['+', '-'].contains(op))
+                    {
+                        advance();
+
+                        expr = Expr.EBinary(expr, op, parseMulDiv());
+                    } else {
+                        return expr;
+                    }
+                default:
+                    return expr;
+            }
+        }
+
+        return expr;
+    }
+
+    function parseMulDiv():Expr
+    {
+        var expr:Expr = parsePrimary();
+
+        while (pos < tokens.length)
+        {
+            switch (peek())
+            {
+                case TOp(op):
+                    if (['*', '/', '%'].contains(op))
+                    {
+                        advance();
+
+                        expr = Expr.EBinary(expr, op, parsePrimary());
+                    } else {
+                        return expr;
+                    }
+                default:
+                    return expr;
+            }
+        }
+
+        return expr;
+    }
+
+    function parsePrimary():Expr
+    {
         return switch (advance())
         {
             case TString(str):
                 Expr.EString(str);
+            case TNumber(num):
+                Expr.ENumber(num);
             case TIdent(id):
                 Expr.EVar(id);
+            case TLParen:
+                final expr:Expr = parseExpr();
+                
+                switch (advance())
+                {
+                    case TRParen:
+                    default:
+                        tokenError();
+                }
+
+                expr;
             default:
-                throw tokenError();
+                tokenError();
         }
     }
 }
