@@ -21,12 +21,106 @@ class Interp extends scripting.haxe.ScriptBasic
 
     function executeStatement(statement:Stmt):Dynamic
     {
-        switch (statement)
+        return switch (statement)
         {
             case SVar(name, val):
-                scope.assign(name, evaluate(val));
+                scope.define(name, evaluate(val));
 
                 null;
+            case SAssign(name, val):
+                scope.assign(name, evaluate(val));
+                
+                null;
+            case SReturn(val):
+                evaluate(val);
+            case SBlock(stmts):
+                executeBlock(stmts);
+            default:
+        }
+    }
+
+    function executeBlock(statements:Array<Stmt>):Dynamic
+    {
+        final previous:Scope = scope;
+
+        scope = new Scope(scope);
+
+        for (stmt in statements)
+        {
+            final result:Dynamic = executeStatement(stmt);
+
+            if (result != null)
+            {
+                scope = previous;
+
+                return result;
+            }
+        }
+
+        scope = previous;
+
+        return null;
+    }
+
+    function evaluate(expr:Expr):Dynamic
+    {
+        return switch (expr)
+        {
+            case EString(str):
+                str;
+            case ENumber(num):
+                num;
+            case EVar(name):
+                scope.get(name);
+            case EBinOp(left, op, right):
+                final l = evaluate(left);
+
+                final r = evaluate(right);
+
+                switch (op)
+                {
+                    case '+':
+                        l + r;
+                    case '-':
+                        l - r;
+                    case '*':
+                        l * r;
+                    case '/':
+                        l / r;
+                    case '%':
+                        l % r;
+                    case '==':
+                        l == r;
+                    case '!=':
+                        l != r;
+                    case '>':
+                        l > r;
+                    case '<':
+                        l < r;
+                    case '>=':
+                        l >= r;
+                    case '<=':
+                        l <= r;
+                    case '&&':
+                        l && r;
+                    case '||':
+                        l || r;
+                    case '&':
+                        l & r;
+                    case '|':
+                        l | r;
+                    case '^':
+                        l ^ r;
+                    case '<<':
+                        l << r;
+                    case '>>':
+                        l >> r;
+                    case '>>>':
+                        l >>> r;
+                    default:
+                        null;
+                }
+            default:
         }
     }
 }

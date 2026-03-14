@@ -69,9 +69,7 @@ class Parser extends scripting.haxe.ScriptBasic
                 result.push(stmt);
         }
 
-        debugTrace(result);
-
-        return [];
+        return result;
     }
 
     function parseStatement():Stmt
@@ -83,8 +81,18 @@ class Parser extends scripting.haxe.ScriptBasic
                 {
                     case 'var':
                         parseVariable();
+                    case 'return':
+                        parseReturn();
                     default:
+                        switch (peek())
+                        {
+                            case TEqual:
+                                parseAssign();
+                            default:
+                        }
                 }
+            case TLBrace:
+                parseBlock();
             default:
         }
     }
@@ -129,6 +137,61 @@ class Parser extends scripting.haxe.ScriptBasic
         return Stmt.SVar(name, value);
     }
 
+    function parseReturn():Stmt
+    {
+        final expr:Expr = parseExpr();
+
+        semicolon();
+
+        return Stmt.SReturn(expr);
+    }
+
+    function parseAssign():Stmt
+    {
+        final name:String = switch (peekLast())
+        {
+            case TIdent(id):
+                id;
+            default:
+                error();
+        };
+
+        switch (advance())
+        {
+            case TEqual:
+            default:
+                error();
+        }
+
+        final value:Expr = parseExpr();
+
+        semicolon();
+
+        return Stmt.SAssign(name, value);
+    }
+
+    function parseBlock():Stmt
+    {
+        final result:Array<Stmt> = [];
+
+        while (!isEnd() && switch (peek()) { case TRBrace: false; default: true; })
+        {
+            final stmt:Stmt = parseStatement();
+
+            if (stmt != null)
+                result.push(stmt);
+        }
+
+        switch (advance())
+        {
+            case TRBrace:
+            default:
+                error();
+        }
+
+        return Stmt.SBlock(result);
+    }
+
     function parseExpr():Expr
     {
         return parseAddSub();
@@ -147,7 +210,7 @@ class Parser extends scripting.haxe.ScriptBasic
                     {
                         advance();
 
-                        expr = Expr.EBinary(expr, op, exprFunc());
+                        expr = Expr.EBinOp(expr, op, exprFunc());
                     } else {
                         break;
                     }

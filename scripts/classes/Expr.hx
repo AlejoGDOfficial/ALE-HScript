@@ -10,5 +10,5 @@ enum Expr
     EVar(name:String);
     EAssign(name:String, value:Expr);
 
-    EBinary(left:Expr, op:String, right:Expr);
+    EBinOp(left:Expr, op:String, right:Expr);
 }
