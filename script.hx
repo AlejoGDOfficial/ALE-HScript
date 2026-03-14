@@ -6,15 +6,16 @@ var str:String = "oso";
 
 var oso:String = 'oso';
 
-var cosito:Bool = true;
+var cosito:Bool = false;
 
+if (!cosito)
 {
     a = 20;
 
     var b:Int = 20;
 
-    camGame.scroll.x = -b;
-    camGame.scroll.y = -a;
+    camGame.scroll.x = -a;
+    camGame.scroll.y = -b;
 }
 
-return cosito == false;
+return a;

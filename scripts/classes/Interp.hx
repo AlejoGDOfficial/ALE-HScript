@@ -55,30 +55,38 @@ class Interp extends scripting.haxe.ScriptBasic
             case SReturn(val):
                 evaluate(val);
             case SBlock(stmts):
-                executeBlock(stmts);
+                executeBlock(statement);
+            case SIf(condition, block):
+                if (evaluate(condition))
+                    executeBlock(block);
             default:
         }
     }
 
-    function executeBlock(statements:Array<Stmt>):Dynamic
+    function executeBlock(block:Stmt):Dynamic
     {
-        final previous:Scope = scope;
-
-        scope = new Scope(scope);
-
-        for (stmt in statements)
+        switch (block)
         {
-            final result:Dynamic = executeStatement(stmt);
+            case SBlock(statements):
+                final previous:Scope = scope;
 
-            if (result != null)
-            {
+                scope = new Scope(scope);
+
+                for (stmt in statements)
+                {
+                    final result:Dynamic = executeStatement(stmt);
+
+                    if (result != null)
+                    {
+                        scope = previous;
+
+                        return result;
+                    }
+                }
+
                 scope = previous;
-
-                return result;
-            }
+            default:
         }
-
-        scope = previous;
 
         return null;
     }

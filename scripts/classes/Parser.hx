@@ -97,6 +97,10 @@ class Parser extends scripting.haxe.ScriptBasic
                         advance();
 
                         parseReturn();
+                    case 'if':
+                        advance();
+
+                        parseIf();
                     default:
                         final expr:Expr = parseExpr();
 
@@ -104,16 +108,20 @@ class Parser extends scripting.haxe.ScriptBasic
                         {
                             case TEqual:
                                 Stmt.SAssign(expr, parseExpr());
+
+                                semicolon();
                             default:
                                 null;
                         }
                 }
-            case TLBrace:
+            case TLBrace:            
                 advance();
 
                 parseBlock();
             default:
                 advance();
+
+                error();
                 
                 null;
         }
@@ -168,6 +176,34 @@ class Parser extends scripting.haxe.ScriptBasic
         return Stmt.SReturn(expr);
     }
 
+    function parseIf():Stmt
+    {
+        switch (advance())
+        {
+            case TLParen:
+            default:
+                error();
+        }
+
+        final condition:Bool = parseExpr();
+
+        switch (advance())
+        {
+            case TRParen:
+            default:
+                error();
+        }
+
+        final block:Stmt = switch (advance())
+        {
+            case TLBrace:
+                parseBlock();
+            default:
+        }
+
+        return Stmt.SIf(condition, block);
+    }
+
     function parseProperty(expr:Expr):Expr
     {
         while (true)
@@ -188,32 +224,6 @@ class Parser extends scripting.haxe.ScriptBasic
                     return expr;
             }
         }
-        
-        return expr;
-    }
-
-    function parseAssign():Stmt
-    {
-        final name:String = switch (peekLast())
-        {
-            case TIdent(id):
-                id;
-            default:
-                error();
-        };
-
-        switch (advance())
-        {
-            case TEqual:
-            default:
-                error();
-        }
-
-        final value:Expr = parseExpr();
-
-        semicolon();
-
-        return Stmt.SAssign(name, value);
     }
 
     function parseBlock():Stmt
