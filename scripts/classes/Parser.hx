@@ -86,7 +86,6 @@ class Parser extends scripting.haxe.ScriptBasic
                         tokenError();
                 }
             case TEqual:
-                advance();
             default:
                 throw tokenError();
         }
