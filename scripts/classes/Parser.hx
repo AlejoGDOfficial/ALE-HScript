@@ -34,7 +34,7 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function tokenError(?got:String)
     {
-        throw 'Unexpected Token: ' + got ?? peekBack();
+        throw 'Unexpected Token: ' + (got ?? peekBack());
     }
     
     public function parse():Array<Stmt>

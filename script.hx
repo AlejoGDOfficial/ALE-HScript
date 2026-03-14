@@ -1,3 +1,3 @@
-var oso = 'pedrito';
+var oso: = 'pedrito';
 
 return oso;
