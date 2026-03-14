@@ -2,6 +2,8 @@ package;
 
 enum Expr
 {
+    ENull;
+
     ENumber(num:Float);
     EString(value:String);
 

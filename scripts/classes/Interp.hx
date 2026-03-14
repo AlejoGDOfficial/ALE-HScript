@@ -18,4 +18,15 @@ class Interp extends scripting.haxe.ScriptBasic
 
         return null;
     }
+
+    function executeStatement(statement:Stmt):Dynamic
+    {
+        switch (statement)
+        {
+            case SVar(name, val):
+                scope.assign(name, evaluate(val));
+
+                null;
+        }
+    }
 }

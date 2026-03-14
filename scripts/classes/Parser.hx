@@ -42,6 +42,16 @@ class Parser extends scripting.haxe.ScriptBasic
         return pos >= tokens.length;
     }
 
+    function semicolon()
+    {
+        switch (advance())
+        {
+            case TSemiColon:
+            default:
+                error();
+        }
+    }
+
     function error():Bool
     {
         throw 'Unexpected Token: ' + peekLast();
@@ -81,7 +91,7 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function parseVariable():Stmt
     {
-        final name:String = switch (peek())
+        final name:String = switch (advance())
         {
             case TIdent(id):
                 id;
@@ -89,10 +99,97 @@ class Parser extends scripting.haxe.ScriptBasic
                 error();
         }
 
+        var value:Null<Expr> = Expr.ENull;
+
+        switch (peek())
+        {
+            case TColon:
+                advance();
+
+                switch (advance())
+                {
+                    case TIdent(_):
+                    default:
+                        error();
+                }
+            default:
+        }
+
         switch (advance())
         {
-            case :
+            case TEqual:
+                value = parseExpr();
+                        
+                semicolon();
+            case TSemiColon:
+            default:
+                error();
+        }
 
+        return Stmt.SVar(name, value);
+    }
+
+    function parseExpr():Expr
+    {
+        return parseAddSub();
+    }
+
+    function parseBinOp(exprFunc:Void -> Expr, ops:Array<String>):Expr
+    {
+        var expr:Expr = exprFunc();
+
+        while (!isEnd())
+        {
+            switch (peek())
+            {
+                case TOp(op):
+                    if (ops.contains(op))
+                    {
+                        advance();
+
+                        expr = Expr.EBinary(expr, op, exprFunc());
+                    } else {
+                        break;
+                    }
+                default:
+                    break;
+            }
+        }
+
+        return expr;
+    }
+    
+    function parseAddSub():Expr
+    {
+        return parseBinOp(parseMulDiv, ['+', '-']);
+    }
+    
+    function parseMulDiv():Expr
+    {
+        return parseBinOp(parsePrimary, ['*', '/', '%']);
+    }
+
+    function parsePrimary():Expr
+    {
+        return switch (advance())
+        {
+            case TString(str):
+                Expr.EString(str);
+            case TNumber(num):
+                Expr.ENumber(num);
+            case TIdent(id):
+                Expr.EVar(id);
+            case TLParen:
+                final expr:Expr = parseExpr();
+
+                switch (advance())
+                {
+                    case TRParen:
+                    default:
+                        error();
+                }
+
+                expr;
             default:
                 error();
         }
