@@ -107,9 +107,11 @@ class Parser extends scripting.haxe.ScriptBasic
                         switch (advance())
                         {
                             case TEqual:
-                                Stmt.SAssign(expr, parseExpr());
+                                final result:Stmt = Stmt.SAssign(expr, parseExpr());
 
                                 semicolon();
+
+                                result;
                             default:
                                 null;
                         }
