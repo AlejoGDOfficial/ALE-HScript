@@ -56,9 +56,11 @@ class Interp extends scripting.haxe.ScriptBasic
                 evaluate(val);
             case SBlock(stmts):
                 executeBlock(statement);
-            case SIf(condition, block):
+            case SIf(condition, block, elseBlock):
                 if (evaluate(condition))
                     executeBlock(block);
+                else if (elseBlock != null)
+                    executeBlock(elseBlock);
             default:
         }
     }

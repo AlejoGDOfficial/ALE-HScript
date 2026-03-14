@@ -223,8 +223,6 @@ class Parser extends scripting.haxe.ScriptBasic
             default:
         }
 
-        debugTrace(elseBlock);
-
         return Stmt.SIf(condition, block, elseBlock);
     }
 
