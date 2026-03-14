@@ -8,6 +8,8 @@ class Tokenizer extends scripting.haxe.ScriptBasic
     final numberReg:EReg = ~/^[0-9.]+$/;
     final spaceReg:EReg = ~/\s+/;
 
+    var operators:Array<String> = ['+', '-', '*', '/', '%', '==', '!=', '>', '<', '>=', '<=', '&&', '||', '&', '|', '^', '<<', '>>', '>>>', '!'];
+
     public final content:String;
 
     var pos:Int = 0;
@@ -15,6 +17,8 @@ class Tokenizer extends scripting.haxe.ScriptBasic
     public function new(content:String)
     {
         super();
+
+        operators.sort((a, b) -> b.length - a.length);
 
         this.content = content;
     }
@@ -48,9 +52,9 @@ class Tokenizer extends scripting.haxe.ScriptBasic
     {
         final str:String = '';
 
-        advance();
+        final curString:String = advance();
 
-        while (!isEnd() && peek() != '\'')
+        while (!isEnd() && peek() != curString)
             str += advance();
 
         advance();
@@ -76,6 +80,25 @@ class Tokenizer extends scripting.haxe.ScriptBasic
         {
             var cur = peek();
 
+            var foundOp:Bool = false;
+
+            for (op in operators)
+            {
+                if (content.substr(pos, op.length) == op)
+                {
+                    result.push(Token.TOp(op));
+
+                    pos += op.length;
+
+                    foundOp = true;
+                    
+                    break;
+                }
+            }
+
+            if (foundOp)
+                continue;
+
             switch (cur)
             {
                 case '.':
@@ -98,8 +121,6 @@ class Tokenizer extends scripting.haxe.ScriptBasic
                     advance();
 
                     result.push(Token.TRBrace);
-                case '+', '-', '*', '/', '%':
-                    result.push(Token.TOp(advance()));
                 case ':':
                     advance();
 

@@ -143,6 +143,18 @@ class Interp extends scripting.haxe.ScriptBasic
                     default:
                         null;
                 }
+            case EUnOp(op, right):
+                final r = evaluate(right);
+
+                switch (op)
+                {
+                    case '-':
+                        -r;
+                    case '!':
+                        !r;
+                    default:
+                        null;
+                }
             default:
         }
     }

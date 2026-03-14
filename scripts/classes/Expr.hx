@@ -11,4 +11,5 @@ enum Expr
     EProperty(object:Expr, property:String);
 
     EBinOp(left:Expr, op:String, right:Expr);
+    EUnOp(op:String, right:Expr);
 }

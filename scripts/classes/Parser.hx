@@ -14,6 +14,16 @@ class Parser extends scripting.haxe.ScriptBasic
         
         this.tokens = tokens;
     }
+    var operatorsPrecedence:Array<Array<String>> = [
+        ['||'],
+        ['&&'],
+        ['==', '!='],
+        ['>', '<', '>=', '<='],
+        ['&', '^', '|'],
+        ['<<', '>>', '>>>'],
+        ['+', '-'],
+        ['*', '/', '%']
+    ];
 
     var pos:Int = 0;
 
@@ -230,23 +240,27 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function parseExpr():Expr
     {
-        return parseAddSub();
+        return parseBinOps();
     }
 
-    function parseBinOp(exprFunc:Void -> Expr, ops:Array<String>):Expr
+    function parseBinOps(?level:Int):Expr
     {
-        var expr:Expr = exprFunc();
+        level ??= 0;
+
+        final nextFunc = level >= operatorsPrecedence.length ? () -> parseUnary() : () -> parseBinOps(level + 1);
+
+        var expr:Expr = nextFunc();
 
         while (!isEnd())
         {
             switch (peek())
             {
                 case TOp(op):
-                    if (ops.contains(op))
+                    if (level < operatorsPrecedence.length && operatorsPrecedence[level].contains(op))
                     {
                         advance();
 
-                        expr = Expr.EBinOp(expr, op, exprFunc());
+                        expr = Expr.EBinOp(expr, op, nextFunc());
                     } else {
                         break;
                     }
@@ -257,27 +271,17 @@ class Parser extends scripting.haxe.ScriptBasic
 
         return expr;
     }
-    
-    function parseAddSub():Expr
-    {
-        return parseBinOp(parseMulDiv, ['+', '-']);
-    }
-    
-    function parseMulDiv():Expr
-    {
-        return parseBinOp(parseUnary, ['*', '/', '%']);
-    }
 
     function parseUnary():Expr
     {
         switch (peek())
         {
             case TOp(op):
-                if (['-'].contains(op))
+                if (['-', '!'].contains(op))
                 {
                     advance();
 
-                    return Expr.EBinOp(Expr.ENumber(0), op, parseUnary());
+                    return Expr.EUnOp(op, parseUnary());
                 }
             default:
         }
