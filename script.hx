@@ -10,4 +10,4 @@ var str:String = 'oso';
     var b = 20;
 }
 
-return a * b + str;
+return a * b + scriptName;

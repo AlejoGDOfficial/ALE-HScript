@@ -6,6 +6,8 @@ class Scope extends scripting.haxe.ScriptBasic
 {
     public var parent:Scope;
 
+    public var superInstance:Dynamic;
+
     public var variables:StringMap<Dynamic> = new StringMap();
 
     public function new(?parent:Scope)
@@ -24,9 +26,10 @@ class Scope extends scripting.haxe.ScriptBasic
     {
         if (variables.exists(name))
             return variables.get(name);
-
-        if (parent != null)
+        else if (parent != null)
             return parent.get(name);
+        else if (superInstance != null)
+            return Reflect.getProperty(superInstance, name);
 
         return null;
     }
@@ -37,5 +40,7 @@ class Scope extends scripting.haxe.ScriptBasic
             variables.set(name, value);
         else if (parent != null)
             parent.assign(name, value);
+        else if (superInstance != null)
+            Reflect.setProperty(superInstance, name, value);
     }
 }

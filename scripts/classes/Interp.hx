@@ -4,6 +4,16 @@ import haxe.ds.StringMap;
 
 class Interp extends scripting.haxe.ScriptBasic
 {
+    public var superInstance(default, set):Dynamic;
+    function set_superInstance(value:Dynamic):Dynamic
+    {
+        superInstance = value;
+
+        scope.superInstance = superInstance;
+
+        return superInstance;
+    }
+
     var scope:Scope = new Scope();
 
     public function execute(ast:Array<Stmt>):Dynamic

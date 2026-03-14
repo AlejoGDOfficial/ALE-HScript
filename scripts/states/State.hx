@@ -18,7 +18,7 @@ function onCreate()
 {
     final content = Paths.getContent('script.hx');
     
-    var script:Script = new Script();
+    var script:Script = new Script(FlxG.state);
 
     debugTrace(script.execute(content));
 }
