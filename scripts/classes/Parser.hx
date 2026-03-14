@@ -17,7 +17,12 @@ class Parser extends scripting.haxe.ScriptBasic
 
     var pos:Int = 0;
 
-    function isEnd()
+    function advance():Token
+    {
+        return tokens[pos++];
+    }
+
+    function isEnd():Bool
     {
         return pos < tokens.length;
     }
@@ -28,11 +33,22 @@ class Parser extends scripting.haxe.ScriptBasic
 
         while (!isEnd())
         {
-            pos++;
+            final stmt:Stmt = parseStatement();
+
+            if (stmt != null)
+                result.push(stmt);
         }
 
         debugTrace(result);
 
         return [];
+    }
+
+    function parseStatement():Stmt
+    {
+        return switch (advance())
+        {
+
+        }
     }
 }
