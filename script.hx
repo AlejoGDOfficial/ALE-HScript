@@ -7,9 +7,10 @@ var str:String = 'oso';
 {
     a = 20;
 
-    b = camGame.scroll.x + 10;
+    var b:Int = 20;
 
-    camGame.scroll.x = 100;
+    camGame.scroll.x = -b;
+    camGame.scroll.y = -a;
 }
 
 return camGame.scroll.x;

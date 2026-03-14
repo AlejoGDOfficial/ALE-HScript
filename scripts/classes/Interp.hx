@@ -33,12 +33,10 @@ class Interp extends scripting.haxe.ScriptBasic
     {
         switch (expr)
         {
-            case EVar(name):
-                scope.assign(name, value);
-            case EProperty(objExpr, property):
-                Reflect.setProperty(evaluate(objExpr), property, value);
-            default:
-                error();
+            case EVar(id):
+                scope.assign(id, value);
+            case EProperty(object, id):
+                Reflect.setProperty(evaluate(object), id, value);
         }
     }
 
@@ -50,14 +48,8 @@ class Interp extends scripting.haxe.ScriptBasic
                 scope.define(name, evaluate(val));
 
                 null;
-            case SAssign(name, val):
-                switch (val)
-                {
-                    case EProperty(_, __):
-                        setProperty(val, evaluate(val));
-                    default:
-                        scope.assign(name, evaluate(val));
-                }
+            case SAssign(object, value):
+                setProperty(object, evaluate(value));
                 
                 null;
             case SReturn(val):

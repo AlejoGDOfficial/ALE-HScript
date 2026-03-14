@@ -4,6 +4,8 @@ CoolUtil.resizeGame(500, 500, false);
 
 MobileAPI.setOrientation('portrait');
 
+add(new FlxSprite().makeGraphic(10, 10));
+
 function onHotReloadingConfig()
 {
     for (file in Paths.readDirectory('scripts/classes'))

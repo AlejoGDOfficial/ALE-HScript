@@ -74,26 +74,38 @@ class Parser extends scripting.haxe.ScriptBasic
 
     function parseStatement():Stmt
     {
-        return switch (advance())
+        return switch (peek())
         {
             case TIdent(id):
                 switch (id)
                 {
                     case 'var':
+                        advance();
+
                         parseVariable();
                     case 'return':
+                        advance();
+
                         parseReturn();
                     default:
-                        switch (peek())
+                        final expr:Expr = parseExpr();
+
+                        switch (advance())
                         {
                             case TEqual:
-                                parseAssign();
+                                Stmt.SAssign(expr, parseExpr());
                             default:
+                                null;
                         }
                 }
             case TLBrace:
+                advance();
+
                 parseBlock();
             default:
+                advance();
+                
+                null;
         }
     }
 
@@ -144,6 +156,30 @@ class Parser extends scripting.haxe.ScriptBasic
         semicolon();
 
         return Stmt.SReturn(expr);
+    }
+
+    function parseProperty(expr:Expr):Expr
+    {
+        while (true)
+        {
+            switch (peek())
+            {
+                case TDot:
+                    advance();
+
+                    switch (advance())
+                    {
+                        case TIdent(id):
+                            expr = Expr.EProperty(expr, id);
+                        default:
+                            error();
+                    }
+                default:
+                    return expr;
+            }
+        }
+        
+        return expr;
     }
 
     function parseAssign():Stmt
@@ -229,7 +265,24 @@ class Parser extends scripting.haxe.ScriptBasic
     
     function parseMulDiv():Expr
     {
-        return parseBinOp(parsePrimary, ['*', '/', '%']);
+        return parseBinOp(parseUnary, ['*', '/', '%']);
+    }
+
+    function parseUnary():Expr
+    {
+        switch (peek())
+        {
+            case TOp(op):
+                if (['-'].contains(op))
+                {
+                    advance();
+
+                    return Expr.EBinOp(Expr.ENumber(0), op, parseUnary());
+                }
+            default:
+        }
+
+        return parsePrimary();
     }
 
     function parsePrimary():Expr
@@ -257,24 +310,7 @@ class Parser extends scripting.haxe.ScriptBasic
                 error();
         }
 
-        while (true)
-        {
-            switch (peek())
-            {
-                case TDot:
-                    advance();
-
-                    switch (advance())
-                    {
-                        case TIdent(name):
-                            expr = Expr.EProperty(expr, name);
-                        default:
-                            error();
-                    }
-                default:
-                    return expr;
-            }
-        }
+        expr = parseProperty(expr);
 
         return expr;
     }

@@ -8,8 +8,7 @@ enum Expr
     EString(value:String);
 
     EVar(name:String);
-    EProperty(variable:Expr, property:String);
-    EAssign(name:String, value:Expr);
+    EProperty(object:Expr, property:String);
 
     EBinOp(left:Expr, op:String, right:Expr);
 }
