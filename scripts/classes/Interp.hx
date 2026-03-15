@@ -2,7 +2,7 @@ package;
 
 import haxe.ds.StringMap;
 
-class Interp extends scripting.haxe.ScriptBasic
+class Interp
 {
     public var superInstance(default, set):Dynamic;
     function set_superInstance(value:Dynamic):Dynamic
@@ -13,6 +13,8 @@ class Interp extends scripting.haxe.ScriptBasic
 
         return superInstance;
     }
+
+    public function new() {}
 
     var scope:Scope = new Scope();
 

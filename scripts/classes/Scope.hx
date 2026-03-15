@@ -2,7 +2,7 @@ package;
 
 import haxe.ds.StringMap;
 
-class Scope extends scripting.haxe.ScriptBasic
+class Scope
 {
     public var parent:Scope;
 
@@ -12,8 +12,6 @@ class Scope extends scripting.haxe.ScriptBasic
 
     public function new(?parent:Scope)
     {
-        super();
-
         this.parent = parent;
     }
 

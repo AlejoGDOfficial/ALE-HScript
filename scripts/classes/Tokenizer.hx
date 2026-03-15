@@ -2,7 +2,7 @@ package;
 
 import Token;
 
-class Tokenizer extends scripting.haxe.ScriptBasic
+class Tokenizer
 {
     final identReg:EReg = ~/^[A-Za-z_][A-Za-z0-9_]*$/;
     final numberReg:EReg = ~/^[0-9.]+$/;
@@ -16,8 +16,6 @@ class Tokenizer extends scripting.haxe.ScriptBasic
 
     public function new(content:String)
     {
-        super();
-
         operators.sort((a, b) -> b.length - a.length);
 
         this.content = content;

@@ -4,16 +4,15 @@ import Token;
 import Stmt;
 import Expr;
 
-class Parser extends scripting.haxe.ScriptBasic
+class Parser
 {
     public final tokens:Array<Token>;
     
     public function new(tokens:Array<Token>)
     {
-        super();
-        
         this.tokens = tokens;
     }
+    
     var operatorsPrecedence:Array<Array<String>> = [
         ['||'],
         ['&&'],

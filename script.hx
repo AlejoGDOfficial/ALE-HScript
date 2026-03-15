@@ -18,6 +18,8 @@ if (cosito)
     camGame.scroll.y = -b;
 } else {
     a = 10;
+
+    camGame.scroll.x = -100;
 }
 
 return a;

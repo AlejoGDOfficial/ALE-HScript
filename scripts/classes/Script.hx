@@ -1,6 +1,6 @@
 package;
 
-class Script extends scripting.haxe.ScriptBasic
+class Script
 {
     public var superInstance(default, set):Dynamic;
     function set_superInstance(value:Dynamic)
@@ -16,8 +16,6 @@ class Script extends scripting.haxe.ScriptBasic
     
     public function new(?superInstance:Dynamic)
     {
-        super();
-        
         this.interp = new Interp();
 
         this.superInstance = superInstance;
