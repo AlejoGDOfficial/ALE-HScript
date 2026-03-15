@@ -7,7 +7,7 @@ enum Stmt
 
     SReturn(value:Expr);
 
-    SIf(bool:Expr, block:Stmt, ?elseBlock:Stmt);
+    SIf(bool:Expr, block:Stmt, ?elseIf:Stmt);
 
     SBlock(statements:Array<Stmt>);
 }

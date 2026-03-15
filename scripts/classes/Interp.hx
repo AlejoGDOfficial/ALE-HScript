@@ -59,11 +59,11 @@ class Interp
                 evaluate(val);
             case SBlock(stmts):
                 executeBlock(statement);
-            case SIf(condition, block, elseBlock):
+            case SIf(condition, block, elseIf):
                 if (evaluate(condition))
                     executeBlock(block);
-                else if (elseBlock != null)
-                    executeStatement(elseBlock);
+                else if (elseIf != null)
+                    executeStatement(elseIf);
 
                 null;
             default:

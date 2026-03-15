@@ -220,7 +220,7 @@ class Parser
                         switch (advance())
                         {
                             case TLBrace:
-                                elseBlock = Stmt.SIf(Expr.ETrue, parseBlock());
+                                elseBlock = Stmt.SIf(Expr.ETrue, parseBlock(), null);
                             case TIdent(id):
                                 elseBlock = parseIf();
                             default:

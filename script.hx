@@ -6,9 +6,9 @@ var str:String = "oso";
 
 var oso:String = 'oso';
 
-var cosito:Bool = true;
+var cosito:Bool = false;
 
-if (!cosito)
+if (cosito)
 {
     a = 20;
 
@@ -16,11 +16,7 @@ if (!cosito)
 
     camGame.scroll.x = -a;
     camGame.scroll.y = -b;
-} else if (false) {
-    a = 10;
-} else if (false) {
-    a = 100;
-} else if (true) {
+} else {
     a = 500;
 }
 
