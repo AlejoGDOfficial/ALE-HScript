@@ -63,7 +63,7 @@ class Interp
                 if (evaluate(condition))
                     executeBlock(block);
                 else if (elseBlock != null)
-                    executeBlock(elseBlock);
+                    executeStatement(elseBlock);
 
                 null;
             default:

@@ -202,21 +202,27 @@ class Parser
             case TLBrace:
                 parseBlock();
             default:
+                error();
+
                 null;
         }
 
         var elseBlock:Stmt = null;
 
-        switch (advance())
+        switch (peek())
         {
             case TIdent(id):
                 switch (id)
                 {
                     case 'else':
+                        advance();
+
                         switch (advance())
                         {
                             case TLBrace:
-                                elseBlock = parseBlock();
+                                elseBlock = Stmt.SIf(Expr.ETrue, parseBlock());
+                            case TIdent(id):
+                                elseBlock = parseIf();
                             default:
                                 error();
                         }
