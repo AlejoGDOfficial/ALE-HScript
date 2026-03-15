@@ -61,12 +61,12 @@ class Parser
         }
     }
 
-    function error():Bool
+    function error()
     {
         throw 'Unexpected Token: ' + peekLast();
     }
 
-    function parse()
+    public function parse()
     {
         final result:Array<Stmt> = [];
 
@@ -136,6 +136,8 @@ class Parser
                 id;
             default:
                 error();
+
+                null;
         }
 
         var value:Null<Expr> = Expr.ENull;
@@ -186,7 +188,7 @@ class Parser
                 error();
         }
 
-        final condition:Bool = parseExpr();
+        final condition:Expr = parseExpr();
 
         switch (advance())
         {
@@ -200,6 +202,7 @@ class Parser
             case TLBrace:
                 parseBlock();
             default:
+                null;
         }
 
         var elseBlock:Stmt = null;
@@ -351,6 +354,8 @@ class Parser
                 expr;
             default:
                 error();
+
+                null;
         }
 
         expr = parseProperty(expr);

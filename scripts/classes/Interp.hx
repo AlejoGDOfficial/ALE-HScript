@@ -39,6 +39,7 @@ class Interp
                 scope.assign(id, value);
             case EProperty(object, id):
                 Reflect.setProperty(evaluate(object), id, value);
+            default:
         }
     }
 
@@ -63,7 +64,10 @@ class Interp
                     executeBlock(block);
                 else if (elseBlock != null)
                     executeBlock(elseBlock);
+
+                null;
             default:
+                null;
         }
     }
 
@@ -114,9 +118,9 @@ class Interp
             case EProperty(name, property):
                 Reflect.getProperty(evaluate(name), property);
             case EBinOp(left, op, right):
-                final l = evaluate(left);
+                final l:Dynamic = evaluate(left);
 
-                final r = evaluate(right);
+                final r:Dynamic = evaluate(right);
 
                 switch (op)
                 {
@@ -162,7 +166,7 @@ class Interp
                         null;
                 }
             case EUnOp(op, right):
-                final r = evaluate(right);
+                final r:Dynamic = evaluate(right);
 
                 switch (op)
                 {
@@ -174,6 +178,7 @@ class Interp
                         null;
                 }
             default:
+                null;
         }
     }
 }

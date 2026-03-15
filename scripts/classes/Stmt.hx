@@ -3,7 +3,7 @@ package;
 enum Stmt
 {
     SVar(name:String, value:Expr);
-    SAssign(name:String, value:Expr);
+    SAssign(obj:Expr, value:Expr);
 
     SReturn(value:Expr);
 

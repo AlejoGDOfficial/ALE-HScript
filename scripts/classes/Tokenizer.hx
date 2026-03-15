@@ -38,7 +38,7 @@ class Tokenizer
 
     function readIdent():String
     {
-        final str:String = '';
+        var str:String = '';
 
         while (!isEnd() && identReg.match(peek()))
             str += advance();
@@ -48,7 +48,7 @@ class Tokenizer
 
     function readString():String
     {
-        final str:String = '';
+        var str:String = '';
 
         final curString:String = advance();
 
@@ -62,7 +62,7 @@ class Tokenizer
 
     function readNumber():Float
     {
-        final str:String = '';
+        var str:String = '';
 
         while (!isEnd() && numberReg.match(peek()))
             str += advance();
