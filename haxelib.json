@@ -1,0 +1,17 @@
+{
+	"name": "ale-hscript",
+	"url": "https://github.com/AlejoGDOfficial/ALE-HScript",
+	"license": "MIT",
+	"tags": [
+		"haxe",
+		"hscript",
+		"scripting"
+	],
+	"description": "HScript Rewrite",
+	"version": "0.1",
+	"releasenote": "",
+	"contributors": [
+		"AlejoGDOfficial"
+	],
+	"classPath": "source"
+}

@@ -1,4 +1,4 @@
-package;
+package ale.hscript;
 
 enum Token
 {
@@ -19,4 +19,14 @@ enum Token
     TDot;
     TSemiColon;
     TColon;
+}
+
+enum Stmt
+{
+    OSO;
+}
+
+enum Expr
+{
+    OSO;
 }
