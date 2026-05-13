@@ -35,16 +35,17 @@ class Lexer
     ];
 
     final simpleTokens:Map<String, Token> = [
-        '.' => Token.TDot,
-        '(' => Token.TLParen,
-        ')' => Token.TRParen,
-        '{' => Token.TLBrace,
-        '}' => Token.TRBrace,
-        ':' => Token.TColon,
-        ';' => Token.TSemiColon,
-        '=' => Token.TEqual
+        '.' => TDot,
+        '(' => TLParen,
+        ')' => TRParen,
+        '{' => TLBrace,
+        '}' => TRBrace,
+        ':' => TColon,
+        ';' => TSemiColon,
+        '=' => TEqual,
+        '?' => TQuestion
     ];
-    
+
     public var content:String = '';
 
     var pos:Int = 0;
@@ -88,6 +89,22 @@ class Lexer
     function readNumber():Float
         return Std.parseFloat(readWhile(numberReg));
 
+    final idents:Map<String, Token> = [
+        'var' => TVar,
+        'final' => TFinal,
+        'class' => TClass,
+        'enum' => TEnum,
+        'typedef' => TTypedef,
+        'abstract' => TAbstract,
+        'function' => TFunction,
+        'package' => TPackage,
+        'import' => TImport,
+        'as' => TAs,
+        'null' => TNull,
+        'true' => TTrue,
+        'false' => TFalse
+    ];
+
     public function tokenize():Array<Token>
     {
         var result:Array<Token> = [];
@@ -102,7 +119,7 @@ class Lexer
             {
                 if (content.substr(pos, op.length) == op)
                 {
-                    result.push(Token.TOp(op));
+                    result.push(TOp(op));
 
                     pos += op.length;
 
@@ -126,7 +143,7 @@ class Lexer
 
             if (cur == '\'' || cur == '"')
             {
-                result.push(Token.TString(readString()));
+                result.push(TString(readString()));
 
                 continue;
             }
@@ -139,11 +156,15 @@ class Lexer
             }
 
             if (identReg.match(cur))
-                result.push(Token.TIdent(readIdent()));
-            else if (numberReg.match(cur))
-                result.push(Token.TNumber(readNumber()));
-            else
+            {
+                final ident:String = readIdent();
+
+                result.push(idents[ident] ?? TIdent(ident));
+            } else if (numberReg.match(cur)) {
+                result.push(TNumber(readNumber()));
+            } else {
                 advance();
+            }
         }
 
         return result;

@@ -1,8 +1,6 @@
 package ale.hscript;
 
-import ale.hscript.Types.Token;
-import ale.hscript.Types.Expr;
-import ale.hscript.Types.Stmt;
+import ale.hscript.Types;
 
 import haxe.Constraints.IMap;
 
@@ -12,60 +10,35 @@ class Parser
 
     public function new() {}
 
-    var pos:Int = 0;
+    var index:Int = 0;
 
     function peek():Token
-        return tokens[pos];
+        return tokens[index];
 
     function peekLast():Token
-        return tokens[pos - 1];
+        return tokens[index - 1];
 
     function peekNext():Token
-        return tokens[pos + 1];
+        return tokens[index + 1];
 
     function advance():Token
-        return tokens[pos++];
+        return tokens[index++];
 
     function isEnd():Bool
-        return pos >= tokens.length;
+        return index >= tokens.length;
 
-    final parseMap:Map<Token, Dynamic> = [
-        // Variable
-        TIdent('var') => cast [
-            TIdent(null) => cast [
-                TColon => cast [
-                    TIdent(null) => cast [
-                        TEqual => '',
-                        TSemiColon => ''
-                    ],
-                ],
-                TEqual => '',
-                TSemiColon => ''
-            ]
-        ],
+    function error()
+        throw 'Unexpected Token: ' + peekLast();
 
-        // Function
-        TIdent('function') => cast [
-            TIdent(null) => cast [
-                TLParen => cast [
-                    TRParen => cast [
-                        TLBrace => cast [
-                            TRBrace => ''
-                        ]
-                    ]
-                ]
-            ]
-        ],
-
-        // Class
-        TIdent('class') => cast [
-            TIdent(null) => cast [
-                TLBrace => cast [
-                    TRBrace => ''
-                ]
-            ]
-        ]
-    ];
+    function semicolon()
+    {
+        switch (advance())
+        {
+            case TSemiColon:
+            default:
+                error();
+        }
+    }
 
     public function parse():Array<Stmt>
     {
@@ -73,43 +46,135 @@ class Parser
 
         while (!isEnd())
         {
-            final res = revursiveParseMap(parseMap);
+            final toPush:Stmt = parseStatement();
 
-            trace(res);
+            if (toPush != null)
+                result.push(toPush);
         }
 
-        return [];
+        trace(result);
+
+        return result;
     }
 
-    public function revursiveParseMap(map:IMap<Token, Dynamic>):Dynamic
+    function parseStatement():Stmt
     {
-        final curToken:Token = peek();
-
-        final nullToken:Token = nullEnum(peek());
-        
-        if (map.exists(curToken) || map.exists(nullToken))
+        return switch (peek())
         {
-            final mapRes:Dynamic = map.get(advance()) ?? map.get(nullToken);
-
-            if (mapRes is IMap)
-                return revursiveParseMap(mapRes);
-            else
-                return mapRes;
-        } else {
-            advance();
+            case TVar, TFinal:
+                parseVar();
+            case TFunction:
+                parseFunction();
+            default:
+                advance();
+                
+                null;
         }
-
-        return 'ERROR';
     }
 
-    function nullEnum<T>(value:T):T
+    function parseFunction():Stmt
     {
-        var enumValue:EnumValue = cast value;
-        var params = Type.enumParameters(enumValue);
-        
-        if (params.length == 0)
-            return value;
+        advance();
 
-        return cast Type.createEnum(Type.getEnum(enumValue), Type.enumConstructor(enumValue), [for (_ in params) null]);
+        final funcName:String = switch (advance())
+        {
+            case TIdent(ident):
+                ident;
+            default:
+                error();
+
+                null;
+        }
+
+        final args:Array<FunctionArgument> = parseFunctionArgs();
+
+        final block:Stmt = parseBlock();
+
+        return SFunction(funcName, args, block);
+    }
+
+    function parseFunctionArgs():Array<FunctionArgument>
+    {
+        final result:Array<FunctionArgument> = [];
+
+        return result;
+    }
+
+    function parseBlock():Stmt
+    {
+        return SBlock([]);
+    }
+
+    function parseVar():Stmt
+    {
+        advance();
+
+        final varName:String = switch (advance())
+        {
+            case TIdent(ident):
+                ident;
+            default:
+                error();
+
+                null;
+        }
+
+        switch (advance())
+        {
+            case TColon:
+                switch (advance())
+                {
+                    case TIdent(_):
+
+                    default:
+                        error();
+                }
+            default:
+                error();
+        }
+
+        switch (peek())
+        {
+            case TEqual:
+                advance();
+            case TSemiColon:
+                advance();
+
+                return SVar(varName, ENull);
+            default:
+                error();
+        }
+
+        final value:Dynamic = parseExpr();
+
+        semicolon();
+
+        return SVar(varName, value);
+    }
+
+    function parseExpr():Expr
+    {
+        return parsePrimitive();
+    }
+
+    function parsePrimitive():Expr
+    {
+        return switch (advance())
+        {
+            case TNull:
+                ENull;
+            case TTrue:
+                ETrue;
+            case TFalse:
+                EFalse;
+            case TNumber(val):
+                ENumber(val);
+            case TString(val):
+                EString(val);
+            default:
+                error();
+
+                null;
+        }
     }
 }

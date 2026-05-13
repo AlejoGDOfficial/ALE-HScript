@@ -2,7 +2,7 @@ package ale.hscript;
 
 import haxe.Exception;
 
-import ale.hscript.Types.Token;
+import ale.hscript.Types.Expr;
 import ale.hscript.Types.Stmt;
 
 class Script

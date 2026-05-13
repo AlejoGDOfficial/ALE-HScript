@@ -1,3 +1,4 @@
 -main Main
 -lib ale-hscript
+# -D message.reporting=pretty
 --interp

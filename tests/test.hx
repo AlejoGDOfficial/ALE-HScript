@@ -1,6 +1,12 @@
-var oso;
-var oso:String;
+final oso:String = 'oso';
 
-function oso() {}
+function osoFunc(?oso:String)
+{
+    oso += 'donde';
 
-class Main {}
+    trace('Scope: ' + oso);
+}
+
+osoFunc('donde tu ta');
+
+trace(oso);

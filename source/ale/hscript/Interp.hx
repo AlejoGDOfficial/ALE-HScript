@@ -1,6 +1,5 @@
 package ale.hscript;
 
-import ale.hscript.Types.Expr;
 import ale.hscript.Types.Stmt;
 
 class Interp
