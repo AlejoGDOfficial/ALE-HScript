@@ -3,4 +3,4 @@ function oso(osoArg:String)
     trace(osoArg);
 }
 
-oso('oso');
+oso('tengo hambre oso');

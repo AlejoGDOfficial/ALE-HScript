@@ -11,7 +11,9 @@ class Interp
     {
         scope = new Scope();
 
-        scope.define('trace', Reflect.makeVarArgs((args) -> trace(args.shift())));
+        scope.define('trace', (e) -> {
+            trace(e);
+        });
     }
 
     public function execute(statement:Stmt):Dynamic
@@ -23,8 +25,7 @@ class Interp
             case SReturn(val):
                 return val;
             case SFunction(id, args, block):
-                scope.define(id, function (params:Array<Dynamic>)
-                {
+                scope.define(id, Reflect.makeVarArgs((params:Array<Dynamic>) -> {
                     final newScope:Scope = new Scope(scope);
 
                     for (index => arg in args)
@@ -37,14 +38,14 @@ class Interp
                         default:
                             [];
                     }, newScope);
-                });
+                }));
             case SBlock(stmts):
                 executeBlock(stmts, new Scope(scope));
             case SCall(obj, args):
                 final func = eval(obj);
 
                 if (Reflect.isFunction(func))
-                    Reflect.callMethod(null, func, [for (arg in args) eval(arg)]);
+                    Reflect.callMethod(this, func, [for (arg in args) eval(arg)]);
             default:
         }
 
