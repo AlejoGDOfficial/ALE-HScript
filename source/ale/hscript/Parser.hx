@@ -69,11 +69,92 @@ class Parser
                 parseVar();
             case TFunction:
                 parseFunction();
+            case TIdent(_):
+                final variable:Expr = parseExpr();
+
+                switch (peek())
+                {
+                    case TSemiColon:
+                        advance();
+
+                        null;
+                    case TLParen:
+                        parseCall(variable);
+                    case TEqual:
+                        parseAssign(variable);
+                    default:
+                        error();
+
+                        null;
+                }
             default:
                 advance();
                 
                 null;
         }
+    }
+
+    function parseCall(obj:Expr):Stmt
+    {
+        if (!advance().match(TLParen))
+            error();
+
+        final args:Array<Expr> = [];
+
+        while (!isEnd() && !peek().match(TRParen))
+        {
+            if (args.length > 0 && !advance().match(TCommma))
+                error();
+
+            args.push(parseExpr());
+        }
+
+        if (!advance().match(TRParen))
+            error();
+
+        return SCall(obj, args);
+    }
+
+    function parseAssign(obj:Expr):Stmt
+    {
+        if (!advance().match(TEqual))
+            error();
+
+        return SAssign(obj, parseExpr());
+    }
+
+    function parseProperty():Expr
+    {
+        var result:Expr = EProperty(null,
+            switch (advance())
+            {
+                case TIdent(id):
+                    id;
+                default:
+                    error();
+
+                    null;
+            }
+        );
+        
+        while (peek().match(TDot))
+        {
+            advance();
+
+            result = EProperty(result,
+                switch (advance())
+                {
+                    case TIdent(id):
+                        id;
+                    default:
+                        error();
+
+                        null;
+                }
+            );
+        }
+
+        return result;
     }
 
     function parseFunction():Stmt
@@ -106,8 +187,7 @@ class Parser
 
         while (!isEnd() && !peek().match(TRParen))
         {
-            if (result.length >= 1)
-                if (!advance().match(TCommma))
+            if (result.length >= 1 && !advance().match(TCommma))
                     error();
 
             final res:FunctionArgument = {
@@ -229,7 +309,13 @@ class Parser
 
     function parseExpr():Expr
     {
-        return parsePrimitive();
+        return switch (peek())
+        {
+            case TIdent(_):
+                parseProperty();
+            default:
+                parsePrimitive();
+        }
     }
 
     function parseType()
@@ -242,8 +328,7 @@ class Parser
             
                 while (!isEnd() && !peek().match(TRParen))
                 {                    
-                    if (total > 0)
-                        if (!advance().match(TCommma))
+                    if (total > 0 && !advance().match(TCommma))
                             error();
 
                     parseType();

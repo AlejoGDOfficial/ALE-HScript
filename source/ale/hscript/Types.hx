@@ -51,13 +51,10 @@ enum Expr
     ENumber(num:Float);
     EString(value:String);
 
-    EVar(name:String);
-    EProperty(object:Expr, property:String);
+    EProperty(object:Null<Expr>, property:String);
 
     EBinOp(left:Expr, op:String, rigth:Expr);
     EUnOp(op:String, rigth:Expr);
-
-    ECall(obj:Expr, args:Array<Expr>);
 }
 
 typedef FunctionArgument = {
@@ -76,4 +73,8 @@ enum Stmt
     SFunction(id:String, args:Array<FunctionArgument>, block:Stmt);
 
     SBlock(statements:Array<Stmt>);
+
+    SAssign(obj:Expr, val:Expr);
+    
+    SCall(obj:Expr, args:Array<Expr>);
 }

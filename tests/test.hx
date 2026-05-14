@@ -1,14 +1,5 @@
-var typedOso:Array<Oso -> (Donde, Tu) -> Ta -> Oso -> Tengo<Hambre<(Oso, Donde) -> Ta>>>;
+var oso:String = 'oso';
 
-final oso:String = 'oso';
-
-function osoFunc(?oso:String, ?donde:String = 'oso'):String
-{
-    oso += 'donde';
-
-    trace('Scope: ' + oso);
-}
-
-osoFunc('donde tu ta');
+oso = 100;
 
 trace(oso);
