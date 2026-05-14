@@ -1,6 +1,6 @@
 final oso:String = 'oso';
 
-function osoFunc(?oso:String)
+function osoFunc(?oso:String, ?donde:String = 'oso'):String
 {
     oso += 'donde';
 

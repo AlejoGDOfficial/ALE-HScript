@@ -36,6 +36,7 @@ class Lexer
 
     final simpleTokens:Map<String, Token> = [
         '.' => TDot,
+        ',' => TCommma,
         '(' => TLParen,
         ')' => TRParen,
         '{' => TLBrace,

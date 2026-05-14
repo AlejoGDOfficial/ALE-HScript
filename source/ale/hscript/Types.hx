@@ -19,6 +19,7 @@ enum Token
     TRBrace;
     
     TDot;
+    TCommma;
     TSemiColon;
     TColon;
     TQuestion;
@@ -59,7 +60,7 @@ enum Expr
 
 typedef FunctionArgument = {
     name:String,
-    ?value:Bool
+    ?value:Expr
 };
 
 enum Stmt

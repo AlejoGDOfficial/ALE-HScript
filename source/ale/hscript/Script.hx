@@ -20,17 +20,22 @@ class Script
 
     public function execute(content:String):Dynamic
     {
+        final lexer:Lexer = Type.createInstance(lexerClass, []);
+        lexer.content = content;
+
+        final parser:Parser = Type.createInstance(parserClass, []);
+        parser.tokens = lexer.tokenize();
+
+        final statements:Array<Stmt> = parser.parse();
+
+        return interp.execute(statements);
+    }
+
+    public function safeExecution(content:String):Dynamic
+    {
         try
         {
-            final lexer:Lexer = Type.createInstance(lexerClass, []);
-            lexer.content = content;
-
-            final parser:Parser = Type.createInstance(parserClass, []);
-            parser.tokens = lexer.tokenize();
-
-            final statements:Array<Stmt> = parser.parse();
-
-            interp.execute(statements);
+            return execute(content);
         } catch(e:Exception) {
             trace('Script Exception: ' + e);
         }

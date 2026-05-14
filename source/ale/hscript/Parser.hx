@@ -27,8 +27,12 @@ class Parser
     function isEnd():Bool
         return index >= tokens.length;
 
-    function error()
-        throw 'Unexpected Token: ' + peekLast();
+    function error(?cur:Bool = false):Bool
+    {
+        throw 'Unexpected Token: ' + (cur ? peek() : peekLast());
+
+        return false;
+    }
 
     function semicolon()
     {
@@ -97,12 +101,90 @@ class Parser
     {
         final result:Array<FunctionArgument> = [];
 
+        if (!advance().match(TLParen))
+            error();
+
+        while (!isEnd() && !peek().match(TRParen))
+        {
+            if (result.length >= 1)
+                if (!advance().match(TCommma))
+                    error();
+
+            final res:FunctionArgument = {
+                name: '',
+                value: null
+            };
+
+            switch (peek())
+            {
+                case TQuestion:
+                    advance();
+                case TIdent(_):
+                default:
+            }
+
+            res.name = switch (advance())
+            {
+                case TIdent(id):
+                    id;
+                default:
+                    error();
+
+                    null;
+            }
+
+            switch (advance())
+            {
+                case TColon:
+                    if (!advance().match(TIdent(_)))
+                        error();
+                default:
+                    error();
+            }
+
+            if (peek().match(TEqual))
+            {
+                advance();
+
+                res.value = parsePrimitive();
+            }
+
+            result.push(res);
+        }
+        
+        if (!advance().match(TRParen))
+            error();
+
+        if (peek().match(TColon))
+        {
+            advance();
+
+            if (!advance().match(TIdent(_)))
+                error();
+        }
+
         return result;
     }
 
     function parseBlock():Stmt
     {
-        return SBlock([]);
+        final result:Array<Stmt> = [];
+
+        if (!advance().match(TLBrace))
+            error();
+
+        while (!isEnd() && !peek().match(TRBrace))
+        {
+            final stmt:Stmt = parseStatement();
+
+            if (stmt != null)
+                result.push(stmt);
+        }
+
+        if (!advance().match(TRBrace))
+            error();
+
+        return SBlock(result);
     }
 
     function parseVar():Stmt
@@ -122,13 +204,8 @@ class Parser
         switch (advance())
         {
             case TColon:
-                switch (advance())
-                {
-                    case TIdent(_):
-
-                    default:
+                if (!advance().match(TIdent(_)))
                         error();
-                }
             default:
                 error();
         }
