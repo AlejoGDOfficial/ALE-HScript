@@ -1,5 +1,6 @@
-var oso:String = 'oso';
+function oso(osoArg:String)
+{
+    trace(osoArg);
+}
 
-oso = 100;
-
-trace(oso);
+oso('oso');

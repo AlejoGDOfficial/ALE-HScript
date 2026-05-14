@@ -44,7 +44,7 @@ class Parser
         }
     }
 
-    public function parse():Array<Stmt>
+    public function parse():Stmt
     {
         final result:Array<Stmt> = [];
 
@@ -56,9 +56,7 @@ class Parser
                 result.push(toPush);
         }
 
-        trace(result);
-
-        return result;
+        return SBlock(result);
     }
 
     function parseStatement():Stmt

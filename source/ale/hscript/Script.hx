@@ -26,7 +26,7 @@ class Script
         final parser:Parser = Type.createInstance(parserClass, []);
         parser.tokens = lexer.tokenize();
 
-        final statements:Array<Stmt> = parser.parse();
+        final statements:Stmt = parser.parse();
 
         return interp.execute(statements);
     }
