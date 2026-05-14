@@ -39,6 +39,7 @@ class Parser
         switch (advance())
         {
             case TSemiColon:
+                
             default:
                 error();
         }
@@ -63,10 +64,15 @@ class Parser
     {
         return switch (peek())
         {
+            case TIf:
+                parseIf();
+
             case TVar, TFinal:
                 parseVar();
+
             case TFunction:
                 parseFunction();
+
             case TIdent(_):
                 final variable:Expr = parseExpr();
 
@@ -85,11 +91,47 @@ class Parser
 
                         null;
                 }
+
             default:
                 advance();
                 
                 null;
         }
+    }
+
+    function parseIf():Stmt
+    {
+        if (!advance().match(TIf))
+            error();
+
+        if (!advance().match(TLParen))
+            error();
+
+        final condition:Expr = parseExpr();
+
+        if (!advance().match(TRParen))
+            error();
+
+        final block:Stmt = parseBlock();
+
+        final elseIf:Stmt = switch (peek())
+        {
+            case TElse:
+                advance();
+
+                switch (peek())
+                {
+                    case TIf:
+                        parseIf();
+                    default:
+                        parseBlock();
+                }
+
+            default:
+                null;
+        }
+
+        return SIf(condition, block, elseIf);
     }
 
     function parseCall(obj:Expr):Stmt
@@ -128,6 +170,7 @@ class Parser
             {
                 case TIdent(id):
                     id;
+
                 default:
                     error();
 
@@ -144,6 +187,7 @@ class Parser
                 {
                     case TIdent(id):
                         id;
+
                     default:
                         error();
 
@@ -163,6 +207,7 @@ class Parser
         {
             case TIdent(ident):
                 ident;
+
             default:
                 error();
 
@@ -197,7 +242,9 @@ class Parser
             {
                 case TQuestion:
                     advance();
+
                 case TIdent(_):
+
                 default:
             }
 
@@ -205,6 +252,7 @@ class Parser
             {
                 case TIdent(id):
                     id;
+
                 default:
                     error();
 
@@ -215,6 +263,7 @@ class Parser
             {
                 case TColon:
                     parseType();
+                    
                 default:
                     error();
             }
@@ -307,13 +356,15 @@ class Parser
 
     function parseExpr():Expr
     {
-        return switch (peek())
+        final result:Expr = switch (peek())
         {
             case TIdent(_):
                 parseProperty();
             default:
                 parsePrimitive();
         }
+
+        return result;
     }
 
     function parseType()

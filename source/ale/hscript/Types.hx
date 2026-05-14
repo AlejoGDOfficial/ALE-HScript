@@ -35,6 +35,9 @@ enum Token
     TImport;
     TAs;
 
+    TIf;
+    TElse;
+
     TNull;
     TTrue;
     TFalse;
@@ -68,7 +71,7 @@ enum Stmt
 
     SReturn(value:Expr);
 
-    SIf(bool:Expr, block:Stmt, ?elseIf:Stmt);
+    SIf(condition:Expr, block:Stmt, ?elseIf:Stmt);
 
     SFunction(id:String, args:Array<FunctionArgument>, block:Stmt);
 

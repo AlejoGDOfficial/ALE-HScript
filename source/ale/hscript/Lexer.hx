@@ -109,7 +109,9 @@ class Lexer
         'as' => TAs,
         'null' => TNull,
         'true' => TTrue,
-        'false' => TFalse
+        'false' => TFalse,
+        'if' => TIf,
+        'else' => TElse
     ];
 
     public function tokenize():Array<Token>

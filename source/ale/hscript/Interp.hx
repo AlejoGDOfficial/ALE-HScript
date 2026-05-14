@@ -16,14 +16,41 @@ class Interp
         });
     }
 
-    public function execute(statement:Stmt):Dynamic
+    public function execute(statement:Stmt, ?optionalScope:Scope):Dynamic
     {
         switch (statement)
         {
+            case SBlock(stmts):
+                final previous = scope;
+                
+                scope = optionalScope ?? new Scope(scope);
+
+                var result:Dynamic = null;
+
+                for (stmt in stmts)
+                {
+                    result = execute(stmt);
+
+                    if (result != null)
+                        break;
+                }
+
+                scope = previous;
+
+                return result;
+
+            case SIf(condition, block, elseIf):
+                if (eval(condition) == true)
+                    execute(block);
+                else if (elseIf != null)
+                    execute(elseIf);
+                
             case SVar(id, val):
                 scope.define(id, val);
+
             case SReturn(val):
                 return val;
+
             case SFunction(id, args, block):
                 scope.define(id, Reflect.makeVarArgs((params:Array<Dynamic>) -> {
                     final newScope:Scope = new Scope(scope);
@@ -31,46 +58,19 @@ class Interp
                     for (index => arg in args)
                         newScope.define(arg.name, params[index] ?? eval(arg.value));
 
-                    return executeBlock(switch (block)
-                    {
-                        case SBlock(stmts):
-                            stmts;
-                        default:
-                            [];
-                    }, newScope);
+                    return execute(block, newScope);
                 }));
-            case SBlock(stmts):
-                executeBlock(stmts, new Scope(scope));
+
             case SCall(obj, args):
                 final func = eval(obj);
 
                 if (Reflect.isFunction(func))
                     Reflect.callMethod(this, func, [for (arg in args) eval(arg)]);
+
             default:
         }
 
         return null;
-    }
-
-    function executeBlock(stmts:Array<Stmt>, scope:Scope)
-    {
-        final previous = this.scope;
-        
-        this.scope = scope;
-
-        var result:Dynamic = null;
-
-        for (stmt in stmts)
-        {
-            result = execute(stmt);
-
-            if (result != null)
-                break;
-        }
-
-        this.scope = previous;
-
-        return result;
     }
 
     function eval(expr:Expr):Dynamic
