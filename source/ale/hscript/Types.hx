@@ -38,6 +38,8 @@ enum Token
     TNull;
     TTrue;
     TFalse;
+
+    TArrow;
 }
 
 enum Expr

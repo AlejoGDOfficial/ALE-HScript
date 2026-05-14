@@ -11,6 +11,10 @@ class Lexer
     final numberReg:EReg = ~/^[0-9.]+$/;
     final spaceReg:EReg = ~/\s+/;
     
+    final doubleTokens:Map<String, Token> = [
+        '->' => TArrow
+    ];
+
     final operators:Array<String> = [
         '+',
         '-',
@@ -28,9 +32,11 @@ class Lexer
         '&',
         '|',
         '^',
+        /*
         '<<',
         '>>',
         '>>>',
+        */
         '!'
     ];
 
@@ -114,7 +120,21 @@ class Lexer
         {
             var cur = peek();
 
-            var foundOp = false;
+            var foundShit = false;
+
+            for (token in doubleTokens.keys())
+            {
+                if (content.substr(pos, token.length) == token)
+                {
+                    result.push(doubleTokens[token]);
+
+                    pos += token.length;
+
+                    foundShit = true;
+
+                    break;
+                }
+            }
 
             for (op in operators)
             {
@@ -124,13 +144,13 @@ class Lexer
 
                     pos += op.length;
 
-                    foundOp = true;
+                    foundShit = true;
 
                     break;
                 }
             }
 
-            if (foundOp)
+            if (foundShit)
                 continue;
 
             if (simpleTokens.exists(cur))

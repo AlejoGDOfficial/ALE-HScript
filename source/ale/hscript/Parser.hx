@@ -136,8 +136,7 @@ class Parser
             switch (advance())
             {
                 case TColon:
-                    if (!advance().match(TIdent(_)))
-                        error();
+                    parseType();
                 default:
                     error();
             }
@@ -204,8 +203,7 @@ class Parser
         switch (advance())
         {
             case TColon:
-                if (!advance().match(TIdent(_)))
-                        error();
+                parseType();
             default:
                 error();
         }
@@ -232,6 +230,53 @@ class Parser
     function parseExpr():Expr
     {
         return parsePrimitive();
+    }
+
+    function parseType()
+    {
+        switch (advance())
+        {
+            case TIdent(_):
+            case TLParen:
+                var total:Int = 0;
+            
+                while (!isEnd() && !peek().match(TRParen))
+                {                    
+                    if (total > 0)
+                        if (!advance().match(TCommma))
+                            error();
+
+                    parseType();
+
+                    total++;
+                }
+
+                if (!advance().match(TRParen))
+                    error();
+
+                if (!advance().match(TArrow))
+                    error();
+
+                parseType();
+            default:
+                error();
+        }
+
+        switch (peek())
+        {
+            case TOp('<'):
+                advance();
+
+                parseType();
+
+                if (!advance().match(TOp('>')))
+                    error();
+            case TArrow:
+                advance();
+                
+                parseType();
+            default:
+        }
     }
 
     function parsePrimitive():Expr
