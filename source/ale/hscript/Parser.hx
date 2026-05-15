@@ -141,6 +141,8 @@ class Parser
 
         final args:Array<Expr> = [];
 
+        trace(peek());
+
         while (!isEnd() && !peek().match(TRParen))
         {
             if (args.length > 0 && !advance().match(TCommma))
@@ -272,7 +274,7 @@ class Parser
             {
                 advance();
 
-                res.value = parsePrimitive();
+                res.value = parseExpr();
             }
 
             result.push(res);
@@ -354,24 +356,12 @@ class Parser
         return SVar(varName, value);
     }
 
-    function parseExpr():Expr
-    {
-        final result:Expr = switch (peek())
-        {
-            case TIdent(_):
-                parseProperty();
-            default:
-                parsePrimitive();
-        }
-
-        return result;
-    }
-
     function parseType()
     {
         switch (advance())
         {
             case TIdent(_):
+
             case TLParen:
                 var total:Int = 0;
             
@@ -392,6 +382,7 @@ class Parser
                     error();
 
                 parseType();
+
             default:
                 error();
         }
@@ -405,28 +396,57 @@ class Parser
 
                 if (!advance().match(TOp('>')))
                     error();
+
             case TArrow:
                 advance();
                 
                 parseType();
+                
             default:
         }
+    }
+
+    function parseExpr():Expr
+    {
+        var result:Expr = switch (peek())
+        {
+            case TIdent(_):
+                parseProperty();
+
+            default:
+                parsePrimitive();
+        }
+
+        return result;
     }
 
     function parsePrimitive():Expr
     {
         return switch (advance())
         {
+            case TLParen:
+                final expr:Expr = parseExpr();
+
+                if (!advance().match(TRParen))
+                    error();
+
+                expr;
+
             case TNull:
                 ENull;
+
             case TTrue:
                 ETrue;
+
             case TFalse:
                 EFalse;
+                
             case TNumber(val):
                 ENumber(val);
+
             case TString(val):
                 EString(val);
+
             default:
                 error();
 

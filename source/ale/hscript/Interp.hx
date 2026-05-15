@@ -12,7 +12,7 @@ class Interp
         scope = new Scope();
 
         scope.define('trace', (e) -> {
-            trace(e);
+            Sys.println('TRACE: ' + e);
         });
     }
 
@@ -46,7 +46,7 @@ class Interp
                     execute(elseIf);
                 
             case SVar(id, val):
-                scope.define(id, val);
+                scope.define(id, eval(val));
 
             case SReturn(val):
                 return val;
@@ -79,19 +79,25 @@ class Interp
         {
             case ENull:
                 null;
+
             case ETrue:
                 true;
+
             case EFalse:
                 false;
+
             case ENumber(value):
                 value;
+
             case EString(value):
                 value;
+                
             case EProperty(obj, property):
                 if (obj == null)
                     scope.get(property);
                 else
                     null;
+
             default:
                 null;
         }

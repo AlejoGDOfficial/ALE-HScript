@@ -37,7 +37,15 @@ class Lexer
         '>>',
         '>>>',
         */
-        '!'
+        '!',
+        '++',
+        '--',
+        
+        '+=',
+        '-=',
+        '*=',
+        '/=',
+        '%=',
     ];
 
     final simpleTokens:Map<String, Token> = [

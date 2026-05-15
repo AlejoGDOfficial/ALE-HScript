@@ -1,13 +1,6 @@
-function oso(osoArg:String)
+function oso()
 {
-    if (false)
-    {
-        trace(osoArg);
-    } else if (true) {
-        trace('oso');
-    } else {
-
-    }
+    trace('oso');
 }
 
-oso('tengo hambre oso');
+trace(oso());

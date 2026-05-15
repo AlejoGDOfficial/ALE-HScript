@@ -56,8 +56,10 @@ enum Expr
 
     EProperty(object:Null<Expr>, property:String);
 
-    EBinOp(left:Expr, op:String, rigth:Expr);
-    EUnOp(op:String, rigth:Expr);
+    EBinOp(left:Expr, op:String, right:Expr);
+
+    EPrefix(op:String, right:Expr);
+    EPostfix(op:String, left:Expr);
 }
 
 typedef FunctionArgument = {
