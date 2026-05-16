@@ -88,9 +88,7 @@ class Interp
                     null;
 
             case EInstance(cls, args):
-                final newClass = execute(cls);
-
-                Type.createInstance(newClass, [for (arg in args) execute(arg)]);
+                Type.createInstance(execute(cls), [for (arg in args) execute(arg)]);
 
             case EIdent(id):
                 final cls = Type.resolveClass(id.join('.'));
