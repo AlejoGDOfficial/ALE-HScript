@@ -11,7 +11,7 @@ function oso(?val:Float = 10):String
 
 oso();
 
-var map:OsoMap = new StringMap<String>();
+var map:OsoMap = new OsoMap<String>();
 
 map.set('oso', 'donde');
 
