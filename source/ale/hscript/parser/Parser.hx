@@ -78,6 +78,31 @@ class Parser
             case TNull:
                 ENull;
 
+            case TVar:
+                final name:String = switch (advance())
+                {
+                    case TIdent(n):
+                        n;
+
+                    default:
+                        error();
+
+                        null;
+                }
+
+                parseOptionalType();
+
+                final value:Dynamic = switch (advance())
+                {
+                    case TEqual:
+                        parseExpr();
+
+                    default:
+                        null;
+                }
+
+                EVar(name, value);
+
             case TIdent(name):
                 var pathVer:String = name;
 
@@ -161,9 +186,7 @@ class Parser
                 parseBlock();
 
             case TNew:
-                // ENew(parseTypePath(), parseArguments());
-
-                null;
+                ENew(parseType(), parseArguments());
 
             default:
                 null;

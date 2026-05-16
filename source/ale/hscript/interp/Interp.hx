@@ -5,8 +5,6 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
-import haxe.ds.ArraySort;
-
 class Interp
 {
     public final name:String;
@@ -37,8 +35,6 @@ class Interp
         return switch (expr)
         {
             case EProgram(stmts):
-                trace(expr);
-
                 var result:Dynamic = null;
 
                 try
@@ -50,6 +46,9 @@ class Interp
                 }
 
                 result;
+
+            case ENew(type, args):
+                Type.createInstance(execute(type), [for (arg in args) execute(arg)]);
 
             case EBlock(stmts):
                 final previous:Scope = scope;
@@ -72,6 +71,13 @@ class Interp
 
             case ECall(obj, args):
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
+
+            case EVar(name, value):
+                final val:Dynamic = execute(value);
+
+                scope.define(name, val);
+
+                val;
 
             case EVarRef(name):
                 scope.get(name);

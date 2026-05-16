@@ -15,8 +15,11 @@ enum Expr
     EFalse;
     ENull;
 
+    EVar(name:String, value:Expr);
     EVarRef(name:String);
     EField(obj:Expr, name:String);
+
+    ENew(type:Expr, args:Array<Expr>);
 
     EFunction(name:String, args:Array<FunctionArgument>, block:Expr);
 

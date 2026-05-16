@@ -1,8 +1,5 @@
-function oso(?value:Float = 100):String
-{
-    trace(value);
+var oso = new haxe.ds.StringMap<Int>();
 
-    return 'oso';
-}
+oso.set('oso', Math.floor(10.5));
 
-trace(oso());
+trace(oso);
