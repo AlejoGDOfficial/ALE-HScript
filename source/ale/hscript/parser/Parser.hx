@@ -78,6 +78,40 @@ class Parser
             case TNull:
                 ENull;
 
+            case TPackage:
+                var result:String = '';
+
+                var shouldContinue:Bool = true;
+
+                while (!isEnd() && shouldContinue)
+                {
+                    switch (advance())
+                    {
+                        case TIdent(n):
+                            result += (result.length > 0 ? '.' : '') + n;
+
+                        default:
+                            error();
+
+                            null;
+                    };
+
+                    shouldContinue = switch (peek())
+                    {
+                        case TDot:
+                            advance();
+
+                            true;
+
+                        default:
+                            false;
+                    };
+                }
+
+                expect(TSemicolon);
+
+                EPackage(result);
+
             case TImport:
                 var wildcard:Bool = false;
 
@@ -137,7 +171,7 @@ class Parser
 
                 expect(TSemicolon);
 
-                return EImport(type, wildcard, nick);
+                EImport(type, wildcard, nick);
 
             case TVar:
                 final name:String = switch (advance())

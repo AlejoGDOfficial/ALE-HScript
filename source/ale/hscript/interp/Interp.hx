@@ -11,16 +11,7 @@ class Interp
 
     public var scope:Scope;
 
-    public final imports:Map<String, Class<Dynamic>> = [];
-
-    public var scriptPackage(default, set):Array<String> = [];
-    function set_scriptPackage(value:Array<String>):Array<String>
-    {
-        if (scriptPackage.length > 0)
-            return scriptPackage;
-
-        return scriptPackage = value;
-    }
+    public var scriptPackage:String = null;
 
     public function new(?name:String)
     {
@@ -48,6 +39,11 @@ class Interp
                 }
 
                 result;
+            
+            case EPackage(pack):
+                scriptPackage = pack;
+
+                null;
 
             case EImport(module, wildcard, nick):
                 if (wildcard)
@@ -59,11 +55,11 @@ class Interp
                             final type = Type.resolveClass(module + '.' + cls);
 
                             if (type != null)
-                                imports[cls] = type;
+                                scope.define(cls, type);
                         }
                     }
                 } else {
-                    imports[nick ?? module.split('.').pop()] = Type.resolveClass(module);
+                    scope.define(nick ?? module.split('.').pop(), Type.resolveClass(module));
                 }
 
                 null;
@@ -132,7 +128,7 @@ class Interp
                 null;
 
             case EType(module):
-                Type.resolveClass(module) ?? imports[module];
+                Type.resolveClass(module) ?? Type.resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
 
             case EField(obj, field):
                 Reflect.getProperty(execute(obj), field);

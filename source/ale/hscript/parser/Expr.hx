@@ -34,7 +34,7 @@ enum Expr
     ECall(obj:Expr, args:Array<Expr>);
 
     EImport(path:String, wildcard:Bool, ?nick:String);
-    EPackage(path:Array<String>);
+    EPackage(pack:String);
 
     EReturn(value:Expr);
 }

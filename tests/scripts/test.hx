@@ -1,4 +1,4 @@
-import haxe.ds.StringMap;
+package haxe.ds;
 
 var oso = new StringMap<String>();
 
