@@ -11,7 +11,7 @@ enum Expr
     ENumber(value:Float);
     EString(value:String);
 
-    EProperty(?obj:Expr, field:String);
+    EIdent(id:Array<String>);
     
     ECall(obj:Expr, args:Array<Expr>);
 

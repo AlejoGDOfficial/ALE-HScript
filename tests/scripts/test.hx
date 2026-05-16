@@ -9,4 +9,6 @@ function oso(?val:Float = 10):String
 
 oso();
 
+trace(sys.io.File);
+
 return 10;

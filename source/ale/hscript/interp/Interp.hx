@@ -87,11 +87,25 @@ class Interp
                 else
                     null;
 
-            case EProperty(obj, field):
-                if (obj == null)
-                    scope.get(field);
-                else
-                    Reflect.getProperty(execute(obj), field);
+            case EIdent(id):
+                final cls = Type.resolveClass(id.join('.'));
+
+                if (cls == null)
+                {
+                    var obj = scope.get(id[0]);
+
+                    if (obj == null)
+                        throw 'Unknown Variable: ' + id[0];
+
+                    if (id.length > 1)
+                        for (i in 1...id.length)
+                            obj = Reflect.getProperty(obj, id[i]);
+
+                    obj;
+
+                } else {
+                    cls;
+                }
 
             case ENull:
                 null;

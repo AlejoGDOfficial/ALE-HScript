@@ -231,7 +231,7 @@ class Parser
         return switch (peek())
         {
             case TIdent(_):
-                parseProperty();
+                parseIdent();
 
             default:
                 parsePrimary();
@@ -264,30 +264,19 @@ class Parser
         }
     }
 
-    function parseProperty():Expr
+    function parseIdent():Expr
     {
-        var result:Expr = EProperty(null,
-            switch (advance())
-            {
-                case TIdent(id):
-                    id;
+        final result:Array<String> = [];
 
-                default:
-                    error();
+        var shouldContinue:Bool = true;
 
-                    null;
-            }
-        );
-
-        while (!isEnd() && peek() == TDot)
+        while (!isEnd() && shouldContinue)
         {
-            advance();
-
-            result = EProperty(result,
+            result.push(
                 switch (advance())
                 {
-                    case TIdent(id):
-                        id;
+                    case TIdent(n):
+                        n;
 
                     default:
                         error();
@@ -295,9 +284,18 @@ class Parser
                         null;
                 }
             );
+
+            if (peek() == TDot)
+            {
+                advance();
+
+                shouldContinue = true;
+            } else {
+                shouldContinue = false;
+            }
         }
 
-        return result;
+        return EIdent(result);
     }
 
 
