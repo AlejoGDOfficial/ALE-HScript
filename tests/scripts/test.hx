@@ -11,6 +11,8 @@ oso();
 
 var map:haxe.ds.StringMap = new haxe.ds.StringMap<String>();
 
+map.set('oso', 'donde');
+
 trace(map);
 
 return 10;

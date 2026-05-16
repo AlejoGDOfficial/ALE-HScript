@@ -215,8 +215,23 @@ class Parser
 
         expect(TLeftParen);
 
-        while (!isEnd() && peek() != TRightParen)
+        var shouldContinue:Bool = peek() != TRightParen;
+
+        while (!isEnd() && shouldContinue)
+        {
             args.push(parseExpr());
+
+            switch (peek())
+            {
+                case TComma:
+                    advance();
+
+                    shouldContinue = true;
+
+                default:
+                    shouldContinue = false;
+            }
+        }
 
         expect(TRightParen);
 
