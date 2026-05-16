@@ -13,7 +13,7 @@ enum Expr
 
     EProperty(?obj:Expr, field:String);
     
-    ECall(obj:Expr, args:Array<FunctionArgument>);
+    ECall(obj:Expr, args:Array<Expr>);
 
     EAssign(left:Expr, value:Expr);
 

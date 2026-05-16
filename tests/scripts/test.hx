@@ -1,10 +1,10 @@
-var oso:String = 'oso';
+final oso:String = 'oso';
 
 trace(oso);
 
-function oso():String
+function oso(?val:Float = 10):String
 {
-    trace('donde tu ta');
+    trace(val);
 }
 
 oso();
