@@ -3,6 +3,8 @@ package ale.hscript.interp;
 import ale.hscript.parser.Expr;
 import ale.hscript.lexer.Token;
 
+import ale.hscript.utils.TypeList;
+
 class Interp
 {
     public final name:String;
@@ -67,10 +69,20 @@ class Interp
                 scriptPackage = pack;
 
             case EImport(cls, wildcard, nick):
+                final jointCls:String = cls.join('.');
+
                 if (wildcard)
                 {
+                    if (TypeList.list.exists(jointCls))
+                        for (cls in TypeList.list[jointCls])
+                        {
+                            final type = Type.resolveClass(jointCls + '.' + cls);
+
+                            if (type != null)
+                                scope.define(cls, type);
+                        }
                 } else {
-                    scope.define(nick ?? cls[cls.length - 1], Type.resolveClass(cls.join('.')));
+                    scope.define(nick ?? cls[cls.length - 1], Type.resolveClass(jointCls));
                 }
 
                 null;
@@ -111,21 +123,23 @@ class Interp
                 Type.createInstance(execute(cls), [for (arg in args) execute(arg)]);
 
             case EIdent(id):
+                var result = null;
+
                 if (scope.exists(id[0]))
                 {
-                    var obj = scope.get(id[0]);
-
-                    if (obj == null)
-                        throw 'Unknown Variable: ' + id[0];
+                    result = scope.get(id[0]);
 
                     if (id.length > 1)
                         for (i in 1...id.length)
-                            obj = Reflect.getProperty(obj, id[i]);
-
-                    obj;
+                            result = Reflect.getProperty(result, id[i]);
                 } else {
-                    Type.resolveClass(id.join('.')) ?? Type.resolveClass(scriptPackage.concat(id).join('.'));
+                    result = Type.resolveClass(id.join('.')) ?? Type.resolveClass(scriptPackage.concat(id).join('.'));
                 }
+
+                if (result == null)
+                    throw 'Unknown Variable: ' + id.join('.');
+
+                result;
 
             case ENull:
                 null;
