@@ -33,7 +33,7 @@ enum Expr
 
     ECall(obj:Expr, args:Array<Expr>);
 
-    EImport(path:Array<String>, wildcard:Bool, ?nick:String);
+    EImport(path:String, wildcard:Bool, ?nick:String);
     EPackage(path:Array<String>);
 
     EReturn(value:Expr);

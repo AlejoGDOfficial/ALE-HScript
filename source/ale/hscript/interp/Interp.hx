@@ -5,21 +5,13 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
-class Oso
-{
-    public var field:Float;
-
-    public function new(val:Float)
-    {
-        field = val;
-    }
-}
-
 class Interp
 {
     public final name:String;
 
     public var scope:Scope;
+
+    public final imports:Map<String, Class<Dynamic>> = [];
 
     public var scriptPackage(default, set):Array<String> = [];
     function set_scriptPackage(value:Array<String>):Array<String>
@@ -56,6 +48,25 @@ class Interp
                 }
 
                 result;
+
+            case EImport(module, wildcard, nick):
+                if (wildcard)
+                {
+                    if (TypeList.list.exists(module))
+                    {
+                        for (cls in TypeList.list.get(module))
+                        {
+                            final type = Type.resolveClass(module + '.' + cls);
+
+                            if (type != null)
+                                imports[cls] = type;
+                        }
+                    }
+                } else {
+                    imports[nick ?? module.split('.').pop()] = Type.resolveClass(module);
+                }
+
+                null;
 
             case ENew(type, args):
                 Type.createInstance(execute(type), [for (arg in args) execute(arg)]);
@@ -121,7 +132,7 @@ class Interp
                 null;
 
             case EType(module):
-                Type.resolveClass(module);
+                Type.resolveClass(module) ?? imports[module];
 
             case EField(obj, field):
                 Reflect.getProperty(execute(obj), field);

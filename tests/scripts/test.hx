@@ -1,5 +1,7 @@
-var oso = new ale.hscript.interp.Oso(20);
+import haxe.ds.StringMap;
 
-oso.field = 30;
+var oso = new StringMap<String>();
 
-trace(oso.field);
+oso.set('oso', 'oso');
+
+trace(oso)

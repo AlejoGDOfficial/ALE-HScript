@@ -78,6 +78,67 @@ class Parser
             case TNull:
                 ENull;
 
+            case TImport:
+                var wildcard:Bool = false;
+
+                var type:String = '';
+
+                var shouldContinue = true;
+                
+                while (!isEnd() && shouldContinue)
+                {
+                    switch (advance())
+                    {
+                        case TIdent(n):
+                            type += (type.length > 0 ? '.' : '') + n;
+
+                        case TStar if (type.length > 0):
+                            wildcard = true;
+
+                            break;
+
+                        default:
+                            error();
+
+                            null;
+                    }
+
+                    shouldContinue = switch (peek())
+                    {
+                        case TDot:
+                            advance();
+
+                            true;
+
+                        default:
+                            false;
+                    }
+                }
+
+                final nick:String = wildcard ? null : switch (peek())
+                {
+                    case TAs:
+                        advance();
+
+                        switch (advance())
+                        {
+                            case TIdent(n):
+                                n;
+
+                            default:
+                                error();
+
+                                null;
+                        }
+
+                    default:
+                        null;
+                }
+
+                expect(TSemicolon);
+
+                return EImport(type, wildcard, nick);
+
             case TVar:
                 final name:String = switch (advance())
                 {
