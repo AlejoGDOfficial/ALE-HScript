@@ -8,7 +8,8 @@ enum Expr
 
     ENumber(val:Float);
     EString(val:String);
-    EType(module:Array<String>);
+
+    EType(module:String);
 
     ETrue;
     EFalse;
@@ -16,6 +17,8 @@ enum Expr
 
     EVarRef(name:String);
     EField(obj:Expr, name:String);
+
+    EFunction(name:String, args:Array<FunctionArgument>, block:Expr);
 
     EBlock(exprs:Array<Expr>);
 

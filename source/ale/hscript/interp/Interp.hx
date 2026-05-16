@@ -5,6 +5,8 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
+import haxe.ds.ArraySort;
+
 class Interp
 {
     public final name:String;
@@ -49,14 +51,47 @@ class Interp
 
                 result;
 
+            case EBlock(stmts):
+                final previous:Scope = scope;
+                
+                scope = optionalScope ?? new Scope(scope);
+
+                var result:Dynamic = null;
+
+                try
+                {
+                    for (stmt in stmts)
+                        result = execute(stmt);
+                } catch (signal:ReturnSignal) {
+                    result = signal.value;
+                }
+
+                scope = previous;
+
+                result;
+
             case ECall(obj, args):
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
 
             case EVarRef(name):
                 scope.get(name);
 
-            case EType(path):
-                Type.resolveClass(path.join('.'));
+            case EFunction(name, args, block):
+                scope.define(name, Reflect.makeVarArgs(
+                    (params:Array<Dynamic>) -> {
+                        final newScope:Scope = new Scope(scope);
+
+                        for (i => arg in args)
+                            newScope.define(arg.name, params[i] ?? execute(arg.value));
+
+                        execute(block, newScope);
+                    }
+                ));
+
+                null;
+
+            case EType(module):
+                Type.resolveClass(module);
 
             case EField(obj, field):
                 Reflect.getProperty(execute(obj), field);

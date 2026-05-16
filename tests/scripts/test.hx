@@ -1,1 +1,8 @@
-trace(haxe.ds.ArraySort.sort);
+function oso(?value:Float = 100):String
+{
+    trace(value);
+
+    return 'oso';
+}
+
+trace(oso());

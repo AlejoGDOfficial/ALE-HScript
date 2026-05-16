@@ -2,8 +2,6 @@ package ale.hscript.parser;
 
 import ale.hscript.lexer.Token;
 
-import haxe.ds.ArraySort;
-
 class Parser
 {
     public final tokens:Array<Token>;
@@ -111,7 +109,7 @@ class Parser
 
                         if (type != null)
                         {
-                            result = EType(pathVer.split('.'));
+                            result = EType(pathVer);
 
                             pathVer = null;
                         }
@@ -140,9 +138,27 @@ class Parser
                 EPrefix(peekLast(), parseExpr(UNARY));
 
             case TFunction:
-                // parseFunction();
+                final name = switch (advance())
+                {
+                    case TIdent(n):
+                        n;
 
-                null;
+                    default:
+                        error();
+
+                        null;
+                }
+
+                final args:Array<FunctionArgument> = parseFunctionArguments();
+
+                parseOptionalType();
+
+                EFunction(name, args, parseBlock());
+
+            case TLeftBrace:
+                index--;
+
+                parseBlock();
 
             case TNew:
                 // ENew(parseTypePath(), parseArguments());
@@ -187,33 +203,170 @@ class Parser
         }
     }
 
+    function parseBlock():Expr
+    {
+        final result:Array<Expr> = [];
+
+        expect(TLeftBrace);
+
+        while (!isEnd() && peek() != TRightBrace)
+        {
+            final res:Expr = parseExpr();
+
+            if (res != null)
+                result.push(res);
+        }
+
+        expect(TRightBrace);
+
+        return EBlock(result);
+    }
+
     function parseArguments():Array<Expr>
     {
         final result:Array<Expr> = [];
 
         expect(TLeftParen);
 
-        var shouldContinue:Bool = peek() != TRightParen;
-
-        while (!isEnd() && shouldContinue)
+        while (!isEnd() && peek() != TRightParen)
         {
             result.push(parseExpr());
-
-            shouldContinue = switch (peek())
-            {
-                case TComma:
-                    advance();
-
-                    true;
-
-                default:
-                    false;
-            }
+            
+            if (peek() == TComma)
+                advance();
+            else
+                break;
         }
 
         expect(TRightParen);
 
         return result;
+    }
+
+    function parseFunctionArguments():Array<FunctionArgument>
+    {
+        final result:Array<FunctionArgument> = [];
+
+        expect(TLeftParen);
+
+        while (!isEnd() && peek() != TRightParen)
+        {
+            if (peek() == TQuestion)
+                advance();
+
+            final name:String = switch (advance())
+            {
+                case TIdent(n):
+                    n;
+
+                default:
+                    error();
+
+                    null;
+            }
+
+            parseOptionalType();
+
+            var value:Dynamic = null;
+
+            if (peek() == TEqual)
+            {
+                advance();
+
+                value = parseExpr();
+            }
+
+            result.push({name: name, value: value});
+
+            if (peek() == TComma)
+                advance();
+            else
+                break;
+        }
+
+        expect(TRightParen);
+
+        return result;
+    }
+
+    function parseOptionalType()
+    {
+        if (peek() == TColon)
+        {
+            advance();
+
+            parseType();
+        }
+    }
+
+    function parseType():Expr
+    {
+        var typeName:String = '';
+
+        switch (advance())
+        {
+            case TIdent(name):
+                typeName += name;
+
+                while (!isEnd() && peek() == TDot)
+                {
+                    advance();
+
+                    final name:String = switch (advance())
+                    {
+                        case TIdent(n):
+                            n;
+
+                        default:
+                            error();
+
+                            null;
+                    };
+
+                    typeName += '.' + name;
+                }
+                
+            case TLeftParen:
+                var total:Int = 0;
+            
+                while (!isEnd() && !peek().match(TRightParen))
+                {                    
+                    if (total > 0 && !advance().match(TComma))
+                        error();
+
+                    parseType();
+
+                    total++;
+                }
+
+                expect(TRightParen);
+
+                expect(TArrow);
+
+                parseType();
+
+            default:
+                error();
+        }
+
+        switch (peek())
+        {
+            case TLess:
+                advance();
+
+                parseType();
+
+                expect(TGreater);
+
+            case TArrow:
+                advance();
+                
+                parseType();
+                
+            default:
+        }
+
+        return EType(typeName);
     }
 
     function getPrecedence(op:Token):Precedence
