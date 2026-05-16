@@ -1,7 +1,3 @@
-package haxe.ds;
+var oso:Int = 10;
 
-var oso = new StringMap<String>();
-
-oso.set('oso', 'oso');
-
-trace(oso)
+trace(oso++);

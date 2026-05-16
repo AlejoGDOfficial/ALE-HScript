@@ -28,7 +28,9 @@ class Interp
         return switch (expr)
         {
             case EProgram(stmts):
-                var result:Dynamic = null;
+                trace(stmts);
+
+                var result = null;
 
                 try
                 {
@@ -72,7 +74,7 @@ class Interp
                 
                 scope = optionalScope ?? new Scope(scope);
 
-                var result:Dynamic = null;
+                var result = null;
 
                 try
                 {
@@ -87,15 +89,11 @@ class Interp
                 result;
 
             case ESet(name, value):
-                final val:Dynamic = execute(value);
-                
-                scope.set(name, val);
-
-                val;
+                scope.set(name, execute(value));
 
             case ESetField(obj, name, value):
-                final val:Dynamic = execute(value);
-
+                final val = execute(value);
+            
                 Reflect.setProperty(execute(obj), name, val);
 
                 val;
@@ -104,11 +102,7 @@ class Interp
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
 
             case EVar(name, value):
-                final val:Dynamic = execute(value);
-
-                scope.define(name, val);
-
-                val;
+                scope.define(name, execute(value));
 
             case EVarRef(name):
                 scope.get(name);
@@ -195,6 +189,82 @@ class Interp
 
                     case TTripleGreater:
                         l >>> r;
+
+                    default:
+                        null;
+                }
+
+            case EPrefix(op, right):
+                final r = execute(right);
+
+                if (r == null)
+                    return null;
+
+                untyped switch (op)
+                {
+                    case TExclamation:
+                        !r;
+
+                    case TMinus:
+                        -r;
+
+                    case TDoublePlus, TDoubleMinus:
+                        final func:Float -> Float = (val) -> val + (op == TDoubleMinus ? -1 : 1);
+
+                        switch (right)
+                        {
+                            case EVarRef(name):
+                                scope.set(name, func(scope.get(name)));
+
+                            case EField(obj, name):
+                                final obj = execute(obj);
+
+                                final val = func(Reflect.getProperty(obj, name));
+
+                                Reflect.setProperty(obj, name, val);
+
+                                val;
+
+                            default:
+                                null;
+                        }
+
+                    default:
+                        null;
+                }
+
+            case EPostfix(left, op):
+                final l = execute(left);
+
+                if (l == null)
+                    return null;
+
+                untyped switch (op)
+                {
+                    case TDoublePlus, TDoubleMinus:
+                        final func:Float -> Float = (val) -> val + (op == TDoubleMinus ? -1 : 1);
+
+                        switch (left)
+                        {
+                            case EVarRef(name):
+                                final oldVal = scope.get(name);
+
+                                scope.set(name, func(oldVal));
+
+                                oldVal;
+
+                            case EField(obj, name):
+                                final obj = execute(obj);
+
+                                final oldVal = Reflect.getProperty(obj, name);
+
+                                Reflect.setProperty(obj, name, func(oldVal));
+
+                                oldVal;
+
+                            default:
+                                null;
+                        }
 
                     default:
                         null;

@@ -173,7 +173,7 @@ class Parser
 
                 EImport(type, wildcard, nick);
 
-            case TVar:
+            case TVar, TFinal:
                 final name:String = switch (advance())
                 {
                     case TIdent(n):
@@ -254,7 +254,7 @@ class Parser
 
                 result;
             
-            case TExclamation, TDoublePlus, TDoubleMinus:
+            case TExclamation, TDoublePlus, TDoubleMinus, TMinus:
                 EPrefix(peekLast(), parseExpr(UNARY));
 
             case TFunction:
@@ -318,6 +318,9 @@ class Parser
                 final right = parseExpr(getPrecedence(op));
 
                 EBinOp(left, op, right);
+
+            case TDoublePlus, TDoubleMinus:
+                EPostfix(left, advance());
 
             default:
                 left;

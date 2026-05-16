@@ -3,8 +3,6 @@ package ale.hscript.lexer;
 class TokenUtil
 {
     public static final symbolFromString:Map<String, Token> = [
-        '+' => TPlus,
-        '-' => TMinus,
         '*' => TStar,
         '/' => TSlash,
         '%' => TPercent,

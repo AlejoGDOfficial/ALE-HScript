@@ -30,6 +30,7 @@ enum Expr
 
     EBinOp(left:Expr, op:Token, right:Expr);
     EPrefix(op:Token, right:Expr);
+    EPostfix(left:Expr, op:Token);
 
     ECall(obj:Expr, args:Array<Expr>);
 
