@@ -242,7 +242,7 @@ class Lexer
         #if hscriptBenchmark
         final endTime:Float = Timer.stamp();
 
-        Config.BENCHMARK_HANDLER('Lexer', startTime - endTime);
+        Config.BENCHMARK_HANDLER('Lexer', endTime - startTime);
         #end
 
         return result;
