@@ -1,4 +1,6 @@
-package haxe.ds;
+package;
+
+import haxe.ds.StringMap;
 
 final oso:String = 'oso';
 

@@ -109,7 +109,7 @@ class Parser
 
         final result:Array<String> = [];
 
-        var shouldContinue:Bool = true;
+        var shouldContinue:Bool = peek().match(TIdent(_));
 
         while (!isEnd() && shouldContinue)
         {
@@ -145,9 +145,43 @@ class Parser
     {
         advance();
 
-        final type:Expr = parseType();
+        var wildcard:Bool = false;
 
-        final nick:String = switch (peek())
+        final type:Array<String> = [];
+
+        var shouldContinue = true;
+        
+        while (!isEnd() && shouldContinue)
+        {
+            switch (advance())
+            {
+                case TIdent(n):
+                    type.push(n);
+
+                case TStar if (type.length > 0):
+                    wildcard = true;
+
+                    break;
+
+                default:
+                    error();
+
+                    null;
+            }
+
+            shouldContinue = switch (peek())
+            {
+                case TDot:
+                    advance();
+
+                    true;
+
+                default:
+                    false;
+            }
+        }
+
+        final nick:String = wildcard ? null : switch (peek())
         {
             case TAs:
                 advance();
@@ -169,7 +203,7 @@ class Parser
 
         expect(TSemicolon);
 
-        return EImport(type, nick);
+        return EImport(type, wildcard, nick);
     }
 
     function parseVar():Expr

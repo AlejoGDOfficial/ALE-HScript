@@ -12,7 +12,7 @@ enum Expr
     EString(value:String);
 
     EPackage(pack:Array<String>);
-    EImport(cls:Expr, ?nick:String);
+    EImport(cls:Array<String>, ?wildcard:Bool, ?nick:String);
 
     EIdent(id:Array<String>);
 

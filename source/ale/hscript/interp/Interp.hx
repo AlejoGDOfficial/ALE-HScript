@@ -66,15 +66,12 @@ class Interp
             case EPackage(pack):
                 scriptPackage = pack;
 
-            case EImport(cls, nick):
-                scope.define(nick ?? switch (cls)
+            case EImport(cls, wildcard, nick):
+                if (wildcard)
                 {
-                    case EIdent(id):
-                        id[id.length - 1];
-
-                    default:
-                        null;
-                }, execute(cls));
+                } else {
+                    scope.define(nick ?? cls[cls.length - 1], Type.resolveClass(cls.join('.')));
+                }
 
                 null;
 
