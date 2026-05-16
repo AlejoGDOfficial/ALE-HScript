@@ -1,4 +1,4 @@
-import haxe.ds.StringMap as OsoMap;
+package haxe.ds;
 
 final oso:String = 'oso';
 
@@ -11,7 +11,7 @@ function oso(?val:Float = 10):String
 
 oso();
 
-var map:OsoMap = new OsoMap<String>();
+var map:StringMap = new StringMap<String>();
 
 map.set('oso', 'donde');
 

@@ -11,6 +11,7 @@ enum Expr
     ENumber(value:Float);
     EString(value:String);
 
+    EPackage(pack:Array<String>);
     EImport(cls:Expr, ?nick:String);
 
     EIdent(id:Array<String>);

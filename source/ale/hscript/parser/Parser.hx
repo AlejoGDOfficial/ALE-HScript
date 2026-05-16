@@ -56,6 +56,9 @@ class Parser
     {
         return switch (peek())
         {
+            case TPackage:
+                parsePackage();
+
             case TImport:
                 parseImport();
 
@@ -98,6 +101,44 @@ class Parser
 
                 null;
         }
+    }
+
+    function parsePackage():Expr
+    {
+        advance();
+
+        final result:Array<String> = [];
+
+        var shouldContinue:Bool = true;
+
+        while (!isEnd() && shouldContinue)
+        {
+            result.push(switch (advance())
+            {
+                case TIdent(n):
+                    n;
+
+                default:
+                    error();
+
+                    null;
+            });
+
+            shouldContinue = switch (peek())
+            {
+                case TDot:
+                    advance();
+
+                    true;
+
+                default:
+                    false;
+            };
+        }
+
+        expect(TSemicolon);
+
+        return EPackage(result);
     }
 
     function parseImport():Expr
@@ -255,15 +296,15 @@ class Parser
         {
             args.push(parseExpr());
 
-            switch (peek())
+            shouldContinue = switch (peek())
             {
                 case TComma:
                     advance();
-
-                    shouldContinue = true;
+                    
+                    true;
 
                 default:
-                    shouldContinue = false;
+                    false;
             }
         }
 

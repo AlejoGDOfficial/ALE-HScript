@@ -9,6 +9,15 @@ class Interp
 
     public var scope:Scope;
 
+    public var scriptPackage(default, set):Array<String> = [];
+    function set_scriptPackage(value:Array<String>):Array<String>
+    {
+        if (scriptPackage.length > 0)
+            return scriptPackage;
+
+        return scriptPackage = value;
+    }
+
     public function new(?name:String)
     {
         this.name = name ?? Config.INTERP_NAME;
@@ -53,6 +62,9 @@ class Interp
                 scope = previous;
 
                 result;
+
+            case EPackage(pack):
+                scriptPackage = pack;
 
             case EImport(cls, nick):
                 scope.define(nick ?? switch (cls)
@@ -102,9 +114,7 @@ class Interp
                 Type.createInstance(execute(cls), [for (arg in args) execute(arg)]);
 
             case EIdent(id):
-                final cls = Type.resolveClass(id.join('.'));
-
-                if (cls == null)
+                if (scope.exists(id[0]))
                 {
                     var obj = scope.get(id[0]);
 
@@ -117,7 +127,7 @@ class Interp
 
                     obj;
                 } else {
-                    cls;
+                    Type.resolveClass(id.join('.')) ?? Type.resolveClass(scriptPackage.concat(id).join('.'));
                 }
 
             case ENull:
