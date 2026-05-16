@@ -207,6 +207,9 @@ class Parser
 
     
     function parseCall(obj:Expr):Expr
+        return ECall(obj, parseArguments());
+
+    function parseArguments():Array<Expr>
     {
         final args:Array<Expr> = [];
 
@@ -217,7 +220,7 @@ class Parser
 
         expect(TRightParen);
 
-        return ECall(obj, args);
+        return args;
     }
 
 
@@ -230,12 +233,22 @@ class Parser
     {
         return switch (peek())
         {
+            case TNew:
+                parseInstance();
+
             case TIdent(_):
                 parseIdent();
 
             default:
                 parsePrimary();
         }
+    }
+
+    function parseInstance():Expr
+    {
+        advance();
+
+        return EInstance(parseType(), parseArguments());
     }
 
     function parsePrimary():Expr
@@ -309,12 +322,37 @@ class Parser
         }
     }    
 
-    function parseType()
+    function parseType():Expr
     {
+        final typeName:Array<String> = [];
+
         switch (advance())
         {
-            case TIdent(_):
+            case TIdent(name):
+                typeName.push(name);
 
+                var shouldContinue:Bool = name.toLowerCase() == name && peek() == TDot;
+
+                while (!isEnd() && shouldContinue)
+                {
+                    advance();
+
+                    final name:String = switch (advance())
+                    {
+                        case TIdent(n):
+                            n;
+
+                        default:
+                            error();
+
+                            null;
+                    };
+
+                    typeName.push(name);
+
+                    shouldContinue = name.toLowerCase() == name && peek() == TDot;
+                }
+                
             case TLeftParen:
                 var total:Int = 0;
             
@@ -354,5 +392,7 @@ class Parser
                 
             default:
         }
+
+        return EIdent(typeName);
     }
 }

@@ -12,6 +12,8 @@ enum Expr
     EString(value:String);
 
     EIdent(id:Array<String>);
+
+    EInstance(cls:Expr, args:Array<Expr>);
     
     ECall(obj:Expr, args:Array<Expr>);
 

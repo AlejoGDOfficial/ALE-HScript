@@ -96,6 +96,8 @@ enum Token
     TContinue;
     TBreak;
     TReturn;
+    
+    TNew;
 
     TVar;
     TFinal;

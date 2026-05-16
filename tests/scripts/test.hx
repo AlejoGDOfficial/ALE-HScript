@@ -9,6 +9,8 @@ function oso(?val:Float = 10):String
 
 oso();
 
-trace(sys.io.File);
+var map:haxe.ds.StringMap = new haxe.ds.StringMap<String>();
+
+trace(map);
 
 return 10;

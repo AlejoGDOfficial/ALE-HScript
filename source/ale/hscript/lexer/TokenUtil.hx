@@ -55,6 +55,8 @@ class TokenUtil
         'break' => TBreak,
         'return' => TReturn,
 
+        'new' => TNew,
+
         'var' => TVar,
         'final' => TFinal,
         'function' => TFunction,
