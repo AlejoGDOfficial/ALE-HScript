@@ -34,19 +34,19 @@ class Script
         
         final tokens = new Lexer(content).tokenize();
 
-        lexerTime = Timer.stamp() - time;
+        lexerTime = (Timer.stamp() - time) * 1000;
 
         time = Timer.stamp();
 
         final expr = new Parser(tokens).parse();
 
-        parserTime = Timer.stamp() - time;
+        parserTime = (Timer.stamp() - time) * 1000;
 
         time = Timer.stamp();
 
         final result = interp.execute(expr);
 
-        interpTime = Timer.stamp() - time;
+        interpTime = (Timer.stamp() - time) * 1000;
 
         return result;
     }
