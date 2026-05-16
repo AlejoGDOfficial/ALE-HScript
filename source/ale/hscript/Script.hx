@@ -2,16 +2,17 @@ package ale.hscript;
 
 import ale.hscript.lexer.Lexer;
 import ale.hscript.parser.Parser;
+import ale.hscript.interp.Interp;
 
 import haxe.Exception;
 
 class Script
 {
-    public final name:String;
-
     public final content:String;
 
-    public function new(?script:String)
+    public final interp:Interp;
+
+    public function new(?script:String, ?name:String)
     {
         final path:String = Config.SCRIPT_PATH + script + Config.SCRIPT_EXTENSION;
 
@@ -19,7 +20,7 @@ class Script
 
         content = isFile ? Config.FILE_READER(path) : script;
 
-        name = isFile ? path : Config.INTERP_NAME;
+        interp = new Interp(name ?? (isFile ? path : Config.INTERP_NAME));
     }
 
     public function execute():Dynamic
@@ -28,9 +29,9 @@ class Script
 
         final expr = new Parser(tokens).parse();
 
-        trace(expr);
+        final result = interp.execute(expr);
 
-        return null;
+        return result;
     }
 
     public function safeExecute():Dynamic
@@ -39,7 +40,7 @@ class Script
         {
             return execute();
         } catch(error:Exception) {
-            Config.ERROR_HANDLER(name + ': ' + error.message);
+            Config.ERROR_HANDLER(interp.name + ': ' + error.message);
         }
 
         return null;

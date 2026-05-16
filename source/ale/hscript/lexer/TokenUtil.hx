@@ -53,6 +53,7 @@ class TokenUtil
 
         'continue' => TContinue,
         'break' => TBreak,
+        'return' => TReturn,
 
         'var' => TVar,
         'final' => TFinal,

@@ -30,5 +30,7 @@ enum Expr
 
     EBlock(stmts:Array<Expr>);
 
+    EProgram(stmts:Array<Expr>);
+
     EReturn(value:Expr);
 }

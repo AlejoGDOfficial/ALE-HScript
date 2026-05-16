@@ -49,7 +49,7 @@ class Parser
                 result.push(toPush);
         }
         
-        return EBlock(result);
+        return EProgram(result);
     }
 
     public function parseStatement():Expr
@@ -61,6 +61,15 @@ class Parser
 
             case TFunction:
                 parseFunction();
+
+            case TReturn:
+                advance();
+
+                final result:Expr = parseExpr();
+
+                expect(TSemicolon);
+                
+                EReturn(result);
 
             case TIdent(_):
                 final variable:Expr = parseExpr();

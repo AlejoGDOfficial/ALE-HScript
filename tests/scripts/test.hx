@@ -1,6 +1,6 @@
 final oso:String = 'oso';
 
-trace(oso);
+trace('donde');
 
 function oso(?val:Float = 10):String
 {
@@ -8,3 +8,5 @@ function oso(?val:Float = 10):String
 }
 
 oso();
+
+return 10;
