@@ -2,6 +2,8 @@ package ale.hscript.parser;
 
 import ale.hscript.lexer.Token;
 
+import haxe.ds.ArraySort;
+
 class Parser
 {
     public final tokens:Array<Token>;
@@ -16,9 +18,6 @@ class Parser
 
     function peekLast():Token
         return tokens[index - 1];
-
-    function peekNext():Token
-        return tokens[index + 1];
 
     function advance():Token
         return tokens[index++];
@@ -43,284 +42,154 @@ class Parser
 
         while (!isEnd())
         {
-            final toPush:Expr = parseStatement();
+            final res:Expr = parseExpr();
 
-            if (toPush != null)
-                result.push(toPush);
+            if (res != null)
+                result.push(res);
         }
-        
+
         return EProgram(result);
     }
 
-    public function parseStatement():Expr
+    function parseExpr(precedence:Precedence = NONE):Expr
+    {
+        var left = parsePrefix();
+
+        while (!isEnd() && Std.int(precedence) < Std.int(getPrecedence(peek())))
+            left = parsePostfix(left);
+
+        return left;
+    }
+
+    function parsePrefix():Expr
+    {
+        return switch (advance())
+        {
+            case TNumber(val):
+                ENumber(val);
+
+            case TString(val):
+                EString(val);
+
+            case TTrue:
+                ETrue;
+
+            case TFalse:
+                EFalse;
+
+            case TNull:
+                ENull;
+
+            case TIdent(name):
+                var pathVer:String = name;
+
+                var result:Expr = EVarRef(name);
+
+                var shouldContinue:Bool = peek() == TDot;
+
+                while (!isEnd() && shouldContinue)
+                {
+                    advance();
+
+                    switch (advance())
+                    {
+                        case TIdent(n):
+                            if (pathVer != null)
+                                pathVer += (pathVer.length > 0 ? '.' : '') + n;
+                        
+                            result = EField(result, n);
+
+                        default:
+                            error();
+
+                            null;
+                    }
+
+                    if (pathVer != null)
+                    {
+                        final type = Type.resolveClass(pathVer);
+
+                        if (type != null)
+                        {
+                            result = EType(pathVer.split('.'));
+
+                            pathVer = null;
+                        }
+                    }
+
+                    shouldContinue = switch (peek())
+                    {
+                        case TDot:
+                            true;
+
+                        default:
+                            false;
+                    }
+                }
+
+                result;
+
+            case TLeftParen:
+                final result = parseExpr();
+
+                expect(TRightParen);
+
+                result;
+            
+            case TExclamation, TDoublePlus, TDoubleMinus:
+                EPrefix(peekLast(), parseExpr(UNARY));
+
+            case TFunction:
+                // parseFunction();
+
+                null;
+
+            case TNew:
+                // ENew(parseTypePath(), parseArguments());
+
+                null;
+
+            default:
+                null;
+        }
+    }
+
+    function parsePostfix(left:Expr):Expr
     {
         return switch (peek())
         {
-            case TPackage:
-                parsePackage();
+            case TLeftParen:
+                ECall(left, parseArguments());
 
-            case TImport:
-                parseImport();
-
-            case TVar, TFinal:
-                parseVar();
-
-            case TFunction:
-                parseFunction();
-
-            case TReturn:
-                advance();
-
-                final result:Expr = parseExpr();
-
-                expect(TSemicolon);
-                
-                EReturn(result);
-
-            case TIdent(_):
-                final variable:Expr = parseExpr();
-
-                switch (peek())
-                {
-                    case TSemicolon:
-                        advance();
-
-                        null;
-
-                    case TLeftParen:
-                        parseCall(variable);
-
-                    default:
-                        error();
-
-                        null;
-                }
-
-            default:
-                advance();
-
-                null;
-        }
-    }
-
-    function parsePackage():Expr
-    {
-        advance();
-
-        final result:Array<String> = [];
-
-        var shouldContinue:Bool = peek().match(TIdent(_));
-
-        while (!isEnd() && shouldContinue)
-        {
-            result.push(switch (advance())
-            {
-                case TIdent(n):
-                    n;
-
-                default:
-                    error();
-
-                    null;
-            });
-
-            shouldContinue = switch (peek())
-            {
-                case TDot:
-                    advance();
-
-                    true;
-
-                default:
-                    false;
-            };
-        }
-
-        expect(TSemicolon);
-
-        return EPackage(result);
-    }
-
-    function parseImport():Expr
-    {
-        advance();
-
-        var wildcard:Bool = false;
-
-        final type:Array<String> = [];
-
-        var shouldContinue = true;
-        
-        while (!isEnd() && shouldContinue)
-        {
-            switch (advance())
-            {
-                case TIdent(n):
-                    type.push(n);
-
-                case TStar if (type.length > 0):
-                    wildcard = true;
-
-                    break;
-
-                default:
-                    error();
-
-                    null;
-            }
-
-            shouldContinue = switch (peek())
-            {
-                case TDot:
-                    advance();
-
-                    true;
-
-                default:
-                    false;
-            }
-        }
-
-        final nick:String = wildcard ? null : switch (peek())
-        {
-            case TAs:
-                advance();
-
-                switch (advance())
-                {
-                    case TIdent(n):
-                        n;
-
-                    default:
-                        error();
-
-                        null;
-                }
-
-            default:
-                null;
-        }
-
-        expect(TSemicolon);
-
-        return EImport(type, wildcard, nick);
-    }
-
-    function parseVar():Expr
-    {
-        advance();
-
-        final name:String = switch (advance())
-        {
-            case TIdent(n):
-                n;
-            
-            default:
-                error();
-
-                null;
-        }
-
-        parseOptionalType();
-
-        final value:Expr = switch (peek())
-        {
             case TEqual:
                 advance();
 
-                parseExpr();
+                switch (left)
+                {
+                    case EVarRef(name):
+                        ESet(left, name, parseExpr());
+
+                    default:
+                        error(true);
+
+                        null;
+                }
+
+            case TPlus, TMinus, TStar, TSlash, TPercent, TDoubleEqual, TExclamationEqual, TLess, TGreater, TLessEqual, TGreaterEqual, TDoubleAmpersand, TDoublePipe, TAmpersand, TPipe, TCaret, TDoubleLess, TDoubleGreater, TTripleGreater:
+                final op = advance();
+
+                final right = parseExpr(getPrecedence(op));
+
+                EBinOp(left, op, right);
 
             default:
-                null;
+                left;
         }
-        
-        return EVar(name, value);
     }
-
-    function parseFunction():Expr
-    {
-        advance();
-
-        final name:String = switch (advance())
-        {
-            case TIdent(n):
-                n;
-
-            default:
-                error();
-
-                null;
-        }
-
-        final args:Array<FunctionArgument> = [];
-
-        expect(TLeftParen);
-
-        while (!isEnd() && peek() != TRightParen)
-        {
-            if (peek() == TQuestion)
-                advance();
-
-            final name:String = switch (advance())
-            {
-                case TIdent(n):
-                    n;
-
-                default:
-                    error();
-
-                    null;
-            }
-
-            parseOptionalType();
-
-            final value:Dynamic = switch (peek())
-            {
-                case TEqual:
-                    advance();
-
-                    parsePrimary();
-                
-                default:
-                    null;
-            }
-
-            args.push({name: name, value: value});
-        }
-
-        expect(TRightParen);
-
-        parseOptionalType();
-
-        return EFunction(name, args, parseBlock());
-    }
-
-    function parseBlock():Expr
-    {
-        final result:Array<Expr> = [];
-
-        expect(TLeftBrace);
-
-        while (!isEnd() && peek() != TRightBrace)
-        {
-            final stmt:Expr = parseStatement();
-
-            if (stmt != null)
-                result.push(stmt);
-        }
-
-        expect(TRightBrace);
-
-        return EBlock(result);
-    }
-
-    
-    function parseCall(obj:Expr):Expr
-        return ECall(obj, parseArguments());
 
     function parseArguments():Array<Expr>
     {
-        final args:Array<Expr> = [];
+        final result:Array<Expr> = [];
 
         expect(TLeftParen);
 
@@ -328,13 +197,13 @@ class Parser
 
         while (!isEnd() && shouldContinue)
         {
-            args.push(parseExpr());
+            result.push(parseExpr());
 
             shouldContinue = switch (peek())
             {
                 case TComma:
                     advance();
-                    
+
                     true;
 
                 default:
@@ -344,179 +213,60 @@ class Parser
 
         expect(TRightParen);
 
-        return args;
+        return result;
     }
 
-
-    function parseExpr():Expr
+    function getPrecedence(op:Token):Precedence
     {
-        return parsePrimitive();
-    }
-
-    function parsePrimitive():Expr
-    {
-        return switch (peek())
+        return switch (op)
         {
-            case TNew:
-                parseInstance();
+            case TEqual, TPlusEqual, TMinusEqual, TStarEqual, TSlashEqual, TPercentEqual, TDoubleLessEqual, TDoubleGreaterEqual, TTripleGreaterEqual, TAmpersandEqual, TPipeEqual, TCaretEqual:
+                ASSIGNMENT;
 
-            case TIdent(_):
-                parseIdent();
+            case TQuestion, TColon:
+                TERNARY;
 
-            default:
-                parsePrimary();
-        }
-    }
+            case TDoublePipe:
+                OR;
 
-    function parseInstance():Expr
-    {
-        advance();
+            case TDoubleAmpersand:
+                AND;
 
-        return EInstance(parseType(), parseArguments());
-    }
+            case TPipe:
+                BIT_OR;
 
-    function parsePrimary():Expr
-    {
-        return switch (advance())
-        {
-            case TNull:
-                ENull;
-            
-            case TTrue:
-                ETrue;
+            case TCaret:
+                BIT_XOR;
 
-            case TFalse:
-                EFalse;
+            case TAmpersand:
+                BIT_AND;
 
-            case TNumber(value):
-                ENumber(value);
+            case TDoubleEqual, TExclamationEqual:
+                EQUALITY;
 
-            case TString(value):
-                EString(value);
+            case TLess, TGreater, TLessEqual, TGreaterEqual:
+                COMPARISON;
 
-            default:
-                error();
+            case TDoubleLess, TDoubleGreater, TTripleGreater:
+                SHIFT;
 
-                null;
-        }
-    }
+            case TPlus, TMinus:
+                TERM;
 
-    function parseIdent():Expr
-    {
-        final result:Array<String> = [];
+            case TStar, TSlash, TPercent:
+                FACTOR;
 
-        var shouldContinue:Bool = true;
+            case TExclamation, TDoublePlus, TDoubleMinus:
+                UNARY;
 
-        while (!isEnd() && shouldContinue)
-        {
-            result.push(
-                switch (advance())
-                {
-                    case TIdent(n):
-                        n;
-
-                    default:
-                        error();
-
-                        null;
-                }
-            );
-
-            if (peek() == TDot)
-            {
-                advance();
-
-                shouldContinue = true;
-            } else {
-                shouldContinue = false;
-            }
-        }
-
-        return EIdent(result);
-    }
-
-
-    function parseOptionalType()
-    {
-        if (peek() == TColon)
-        {
-            advance();
-
-            parseType();
-        }
-    }    
-
-    function parseType():Expr
-    {
-        final typeName:Array<String> = [];
-
-        switch (advance())
-        {
-            case TIdent(name):
-                typeName.push(name);
-
-                var shouldContinue:Bool = name.toLowerCase() == name && peek() == TDot;
-
-                while (!isEnd() && shouldContinue)
-                {
-                    advance();
-
-                    final name:String = switch (advance())
-                    {
-                        case TIdent(n):
-                            n;
-
-                        default:
-                            error();
-
-                            null;
-                    };
-
-                    typeName.push(name);
-
-                    shouldContinue = name.toLowerCase() == name && peek() == TDot;
-                }
-                
             case TLeftParen:
-                var total:Int = 0;
-            
-                while (!isEnd() && !peek().match(TRightParen))
-                {                    
-                    if (total > 0 && !advance().match(TComma))
-                        error();
+                CALL;
 
-                    parseType();
-
-                    total++;
-                }
-
-                expect(TRightParen);
-
-                expect(TArrow);
-
-                parseType();
+            case TDot:
+                MEMBER;
 
             default:
-                error();
+                NONE;
         }
-
-        switch (peek())
-        {
-            case TLess:
-                advance();
-
-                parseType();
-
-                expect(TGreater);
-
-            case TArrow:
-                advance();
-                
-                parseType();
-                
-            default:
-        }
-
-        return EIdent(typeName);
     }
 }

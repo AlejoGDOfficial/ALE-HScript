@@ -9,8 +9,6 @@ class TokenUtil
         '/' => TSlash,
         '%' => TPercent,
 
-        '=' => TEqual,
-
         '>' => TGreater,
         '<' => TLess,
 
@@ -19,7 +17,6 @@ class TokenUtil
 
         '^' => TCaret,
         '~' => TTilde,
-        '!' => TExclamation,
 
         '(' => TLeftParen,
         ')' => TRightParen,

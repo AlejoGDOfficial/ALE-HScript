@@ -27,6 +27,7 @@ class Interp
         scope = new Scope();
 
         scope.define('trace', (e) -> Sys.println(this.name + ': ' + e));
+        scope.define('Math', Math);
     }
 
     public function execute(expr:Expr, ?optionalScope:Scope):Dynamic
@@ -34,22 +35,7 @@ class Interp
         return switch (expr)
         {
             case EProgram(stmts):
-                var result:Dynamic = null;
-
-                try
-                {
-                    for (stmt in stmts)
-                        result = execute(stmt);
-                } catch (signal:ReturnSignal) {
-                    result = signal.value;
-                }
-
-                result;
-
-            case EBlock(stmts):
-                final previous = scope;
-                
-                scope = optionalScope ?? new Scope(scope);
+                trace(expr);
 
                 var result:Dynamic = null;
 
@@ -61,85 +47,86 @@ class Interp
                     result = signal.value;
                 }
 
-                scope = previous;
-
                 result;
-
-            case EPackage(pack):
-                scriptPackage = pack;
-
-            case EImport(cls, wildcard, nick):
-                final jointCls:String = cls.join('.');
-
-                if (wildcard)
-                {
-                    if (TypeList.list.exists(jointCls))
-                        for (cls in TypeList.list[jointCls])
-                        {
-                            final type = Type.resolveClass(jointCls + '.' + cls);
-
-                            if (type != null)
-                                scope.define(cls, type);
-                        }
-                } else {
-                    scope.define(nick ?? cls[cls.length - 1], Type.resolveClass(jointCls));
-                }
-
-                null;
-
-            case EVar(name, value):
-                final value = execute(value);
-
-                scope.define(name, value);
-
-                value;
-
-            case EFunction(name, args, block):
-                final func = Reflect.makeVarArgs(
-                    function (params:Array<Dynamic>)
-                    {
-                        final newScope:Scope = new Scope(scope);
-
-                        for (index => arg in args)
-                            newScope.define(arg.name, execute(params[index] ?? arg.value));
-
-                        return execute(block, newScope);
-                    }
-                );
-
-                scope.define(name, func);
-
-                func;
 
             case ECall(obj, args):
-                final func = execute(obj);
+                Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
 
-                if (Reflect.isFunction(func))
-                    Reflect.callMethod(this, func, [for (arg in args) execute(arg)]);
-                else
-                    null;
+            case EVarRef(name):
+                scope.get(name);
 
-            case EInstance(cls, args):
-                Type.createInstance(execute(cls), [for (arg in args) execute(arg)]);
+            case EType(path):
+                Type.resolveClass(path.join('.'));
 
-            case EIdent(id):
-                var result = null;
+            case EField(obj, field):
+                Reflect.getProperty(execute(obj), field);
 
-                if (scope.exists(id[0]))
+            case EBinOp(left, op, right):
+                final l = execute(left);
+                final r = execute(right);
+
+                if (l == null || r == null)
+                    return null;
+
+                untyped switch (op)
                 {
-                    result = scope.get(id[0]);
+                    case TPlus:
+                        l + r;
 
-                    if (id.length > 1)
-                        for (i in 1...id.length)
-                            result = Reflect.getProperty(result, id[i]);
-                } else {
-                    result = Type.resolveClass(id.join('.')) ?? Type.resolveClass(scriptPackage.concat(id).join('.'));
+                    case TStar:
+                        l * r;
+
+                    case TSlash:
+                        l / r;
+
+                    case TPercent:
+                        l % r;
+
+                    case TDoubleEqual:
+                        l == r;
+
+                    case TExclamationEqual:
+                        l != r;
+
+                    case TLess:
+                        l < r;
+
+                    case TGreater:
+                        l > r;
+
+                    case TLessEqual:
+                        l <= r;
+
+                    case TGreaterEqual:
+                        l >= r;
+
+                    case TDoubleAmpersand:
+                        l && r;
+
+                    case TDoublePipe:
+                        l || r;
+
+                    case TAmpersand:
+                        l & r;
+
+                    case TPipe:
+                        l | r;
+
+                    case TCaret:
+                        l ^ r;
+
+                    case TDoubleLess:
+                        l << r;
+
+                    case TDoubleGreater:
+                        l >> r;
+
+                    case TTripleGreater:
+                        l >>> r;
+
+                    default:
+                        null;
                 }
-
-                if (result == null)
-                    throw 'Unknown Variable: ' + id.join('.');
-
-                result;
 
             case ENull:
                 null;

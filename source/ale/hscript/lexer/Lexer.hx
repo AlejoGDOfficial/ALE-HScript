@@ -86,8 +86,19 @@ class Lexer
     {
         switch (advance())
         {
+            case '!'.code:
+                if (match('='))
+                    return TExclamationEqual;
+
+                return TExclamation;
+
+            case '='.code:
+                if (match('='))
+                    return TDoubleEqual;
+
+                return TEqual;
+
             case '+'.code:
-            {
                 if (match('+'))
                     return TDoublePlus;
 
@@ -95,10 +106,8 @@ class Lexer
                     return TPlusEqual;
 
                 return TPlus;
-            }
 
             case '-'.code:
-            {
                 if (match('-'))
                     return TDoubleMinus;
 
@@ -109,74 +118,53 @@ class Lexer
                     return TArrow;
 
                 return TMinus;
-            }
 
             case '*'.code:
-            {
                 if (match('='))
                     return TStarEqual;
 
                 return TStar;
-            }
 
             case '/'.code:
-            {
                 if (match('='))
                     return TSlashEqual;
 
                 return TSlash;
-            }
 
             case '%'.code:
-            {
                 if (match('='))
                     return TPercentEqual;
 
                 return TPercent;
-            }
-
-            case '!'.code:
-            {
-                if (match('='))
-                    return TExclamationEqual;
-
-                return TExclamation;
-            }
 
             case '>'.code:
-            {
                 if (match('='))
                     return TGreaterEqual;
 
                 return TGreater;
-            }
 
             case '<'.code:
-            {
                 if (match('='))
                     return TLessEqual;
 
                 return TLess;
-            }
 
             case '&'.code:
-            {
                 if (match('&'))
                     return TDoubleAmpersand;
 
                 return TAmpersand;
-            }
 
             case '|'.code:
-            {
                 if (match('|'))
                     return TDoublePipe;
 
                 return TPipe;
-            }
 
             default:
-                throw 'Unexpected character: ' + content.charAt(index);
+                throw 'Unexpected Character: ' + content.charAt(index);
+
+                return null;
         }
     }
 

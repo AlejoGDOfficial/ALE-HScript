@@ -4,38 +4,30 @@ import ale.hscript.lexer.Token;
 
 enum Expr
 {
-    ENull;
+    EProgram(exprs:Array<Expr>);
+
+    ENumber(val:Float);
+    EString(val:String);
+    EType(module:Array<String>);
+
     ETrue;
     EFalse;
+    ENull;
 
-    ENumber(value:Float);
-    EString(value:String);
+    EVarRef(name:String);
+    EField(obj:Expr, name:String);
 
-    EPackage(pack:Array<String>);
-    EImport(cls:Array<String>, ?wildcard:Bool, ?nick:String);
+    EBlock(exprs:Array<Expr>);
 
-    EIdent(id:Array<String>);
-
-    EInstance(cls:Expr, args:Array<Expr>);
-    
-    ECall(obj:Expr, args:Array<Expr>);
-
-    EAssign(left:Expr, value:Expr);
+    ESet(obj:Expr, name:String, value:Expr);
 
     EBinOp(left:Expr, op:Token, right:Expr);
     EPrefix(op:Token, right:Expr);
-    EPostfix(left:Expr, op:Expr);
 
-    EIf(condition:Expr, thenExpr:Expr, ?elseExpr:Expr);
-    EWhile(condition:Expr, thenExpr:Expr);
-    EDoWhile(condition:Expr, thenExpr:Expr);
-    
-    EVar(name:String, ?value:Expr);
-    EFunction(name:String, args:Array<FunctionArgument>, block:Expr);
+    ECall(obj:Expr, args:Array<Expr>);
 
-    EBlock(stmts:Array<Expr>);
-
-    EProgram(stmts:Array<Expr>);
+    EImport(path:Array<String>, wildcard:Bool, ?nick:String);
+    EPackage(path:Array<String>);
 
     EReturn(value:Expr);
 }
