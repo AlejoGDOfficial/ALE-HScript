@@ -5,6 +5,16 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
+class Oso
+{
+    public var field:Float;
+
+    public function new(val:Float)
+    {
+        field = val;
+    }
+}
+
 class Interp
 {
     public final name:String;
@@ -68,6 +78,20 @@ class Interp
                 scope = previous;
 
                 result;
+
+            case ESet(name, value):
+                final val:Dynamic = execute(value);
+                
+                scope.set(name, val);
+
+                val;
+
+            case ESetField(obj, name, value):
+                final val:Dynamic = execute(value);
+
+                Reflect.setProperty(execute(obj), name, val);
+
+                val;
 
             case ECall(obj, args):
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);

@@ -206,7 +206,10 @@ class Parser
                 switch (left)
                 {
                     case EVarRef(name):
-                        ESet(left, name, parseExpr());
+                        ESet(name, parseExpr());
+
+                    case EField(obj, field):
+                        ESetField(obj, field, parseExpr());
 
                     default:
                         error(true);

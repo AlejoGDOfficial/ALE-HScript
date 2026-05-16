@@ -25,7 +25,8 @@ enum Expr
 
     EBlock(exprs:Array<Expr>);
 
-    ESet(obj:Expr, name:String, value:Expr);
+    ESet(name:String, value:Expr);
+    ESetField(obj:Expr, name:String, value:Expr);
 
     EBinOp(left:Expr, op:Token, right:Expr);
     EPrefix(op:Token, right:Expr);
