@@ -8,6 +8,12 @@ import haxe.rtti.Meta;
 
 using StringTools;
 
+/**
+ * Author: Kriptel
+ * 
+ * @see https://github.com/Kriptel/RuleScript/blob/dev/rulescript/macro/TypeListMacro.hx
+ */
+
 class TypeListMacro
 {
     @:noPrivateAccess
