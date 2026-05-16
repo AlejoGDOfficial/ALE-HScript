@@ -7,8 +7,8 @@ import sys.io.File;
 
 class Defaults
 {
-    public static var FILE_CHECKER:String -> Bool #if sys = FileSystem.exists #end ;
-    public static var FILE_READER:String -> String #if sys = File.getContent #end ;
+    public static final FILE_CHECKER:String -> Bool #if sys = FileSystem.exists #end ;
+    public static final FILE_READER:String -> String #if sys = File.getContent #end ;
 
     public static final IMPORTS:Array<Class<Dynamic>> = [
         Array,
@@ -31,13 +31,14 @@ class Defaults
     public static final TYPEDEFS:Map<String, Class<Dynamic>> = [];
     public static final VARIABLES:Map<String, Dynamic> = [];
 
-    public static var SCRIPT_EXTENSION:String = '.hx';
-    public static var SCRIPT_PATH:String = 'scripts/';
+    public static final SCRIPT_EXTENSION:String = '.hx';
+    public static final SCRIPT_PATH:String = 'scripts/';
 
-    public static var MODULE_EXTENSION:String = '.hx';
-    public static var MODULE_PATH:String = 'classes/';
+    public static final MODULE_EXTENSION:String = '.hx';
+    public static final MODULE_PATH:String = 'classes/';
 
-    public static var INTERP_NAME:String = 'ALEHScript.hx';
+    public static final INTERP_NAME:String = 'ALEHScript.hx';
 
-    public static var ERROR_HANDLER:String -> Void = (e) -> Sys.println('[ ERROR ] ' + e);
+    public static final ERROR_HANDLER:String -> Void = (e) -> Sys.println('[ ERROR ] ' + e);
+    public static final BENCHMARK_HANDLER:String -> Float -> Void = (title, time) -> Sys.println('[ BENCHMARK ] ' + title + ': ' + (time * 1000) + ' ms');
 }

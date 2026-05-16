@@ -39,6 +39,10 @@ class Parser
 
     public function parse():Expr
     {
+        #if hscriptBenchmark
+        final startTime:Float = Timer.stamp();
+        #end
+
         final result:Array<Expr> = [];
 
         while (!isEnd())
@@ -48,6 +52,12 @@ class Parser
             if (toPush != null)
                 result.push(toPush);
         }
+
+        #if hscriptBenchmark
+        final endTime:Float = Timer.stamp();
+
+        Config.BENCHMARK_HANDLER('Parser', endTime - startTime);
+        #end
         
         return EProgram(result);
     }

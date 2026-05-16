@@ -4,8 +4,6 @@ import ale.hscript.lexer.Lexer;
 import ale.hscript.parser.Parser;
 import ale.hscript.interp.Interp;
 
-import haxe.Timer;
-
 import haxe.Exception;
 
 class Script
@@ -26,21 +24,7 @@ class Script
     }
 
     public function execute():Dynamic
-    {
-        final startTime:Float = Timer.stamp();
-
-        final tokens = new Lexer(content).tokenize();
-
-        final expr = new Parser(tokens).parse();
-
-        final result = interp.execute(expr);
-
-        final endTime:Float = Timer.stamp();
-
-        trace('Time: ' + (endTime - startTime));
-
-        return result;
-    }
+        return interp.execute(new Parser(new Lexer(content).tokenize()).parse());
 
     public function safeExecute():Dynamic
     {

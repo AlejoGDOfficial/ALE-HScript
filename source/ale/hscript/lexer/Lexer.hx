@@ -182,6 +182,10 @@ class Lexer
 
     public function tokenize():Array<Token>
     {
+        #if hscriptBenchmark
+        final startTime:Float = Timer.stamp();
+        #end
+
         final result:Array<Token> = [];
 
         while (!isEnd())
@@ -234,6 +238,12 @@ class Lexer
 
             result.push(readOperator());
         }
+
+        #if hscriptBenchmark
+        final endTime:Float = Timer.stamp();
+
+        Config.BENCHMARK_HANDLER('Lexer', startTime - endTime);
+        #end
 
         return result;
     }

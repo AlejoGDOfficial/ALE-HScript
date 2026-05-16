@@ -2,7 +2,6 @@ package ale.hscript.interp;
 
 import ale.hscript.parser.Expr;
 import ale.hscript.lexer.Token;
-import ale.hscript.Config;
 
 class Interp
 {
@@ -19,7 +18,24 @@ class Interp
         scope.define('trace', (e) -> Sys.println(this.name + ': ' + e));
     }
 
-    public function execute(expr:Expr, ?optionalScope:Scope):Dynamic
+    public function execute(expr:Expr):Dynamic
+    {
+        #if hscriptBenchmark
+        final startTime:Float = Timer.stamp();
+        #end
+
+        final result:Dynamic = eval(expr);
+
+        #if hscriptBenchmark
+        final endTime:Float = Timer.stamp();
+        
+        Config.BENCHMARK_HANDLER('Interp', endTime - startTime);
+        #end
+
+        return result;
+    }
+
+    public function eval(expr:Expr, ?optionalScope:Scope):Dynamic
     {
         return switch (expr)
         {
@@ -29,7 +45,7 @@ class Interp
                 try
                 {
                     for (stmt in stmts)
-                        result = execute(stmt);
+                        result = eval(stmt);
                 } catch (signal:ReturnSignal) {
                     result = signal.value;
                 }
@@ -46,7 +62,7 @@ class Interp
                 try
                 {
                     for (stmt in stmts)
-                        result = execute(stmt);
+                        result = eval(stmt);
                 } catch (signal:ReturnSignal) {
                     result = signal.value;
                 }
@@ -56,7 +72,7 @@ class Interp
                 result;
 
             case EVar(name, value):
-                final value = execute(value);
+                final value = eval(value);
 
                 scope.define(name, value);
 
@@ -69,9 +85,9 @@ class Interp
                         final newScope:Scope = new Scope(scope);
 
                         for (index => arg in args)
-                            newScope.define(arg.name, execute(params[index] ?? arg.value));
+                            newScope.define(arg.name, eval(params[index] ?? arg.value));
 
-                        return execute(block, newScope);
+                        return eval(block, newScope);
                     }
                 );
 
@@ -80,15 +96,15 @@ class Interp
                 func;
 
             case ECall(obj, args):
-                final func = execute(obj);
+                final func = eval(obj);
 
                 if (Reflect.isFunction(func))
-                    Reflect.callMethod(this, func, [for (arg in args) execute(arg)]);
+                    Reflect.callMethod(this, func, [for (arg in args) eval(arg)]);
                 else
                     null;
 
             case EInstance(cls, args):
-                Type.createInstance(execute(cls), [for (arg in args) execute(arg)]);
+                Type.createInstance(eval(cls), [for (arg in args) eval(arg)]);
 
             case EIdent(id):
                 final cls = Type.resolveClass(id.join('.'));
@@ -105,7 +121,6 @@ class Interp
                             obj = Reflect.getProperty(obj, id[i]);
 
                     obj;
-
                 } else {
                     cls;
                 }
@@ -126,7 +141,7 @@ class Interp
                 value;
 
             case EReturn(value):
-                throw new ReturnSignal(execute(value));
+                throw new ReturnSignal(eval(value));
 
             default:
                 null;
