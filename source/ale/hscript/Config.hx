@@ -19,5 +19,4 @@ class Config
     public static var INTERP_NAME:String = Defaults.INTERP_NAME;
 
     public static var ERROR_HANDLER:String -> Void = Defaults.ERROR_HANDLER;
-    public static var BENCHMARK_HANDLER:String -> Float -> Void = Defaults.BENCHMARK_HANDLER;
 }

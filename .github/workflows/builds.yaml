@@ -22,4 +22,4 @@ jobs:
       - name: Build
         run: |
           cd tests
-          haxe build.hxml -D hscriptBenchmark
+          haxe build.hxml -D VERBOSE_TEST

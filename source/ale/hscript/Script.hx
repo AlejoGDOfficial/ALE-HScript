@@ -5,6 +5,7 @@ import ale.hscript.parser.Parser;
 import ale.hscript.interp.Interp;
 
 import haxe.Exception;
+import haxe.Timer;
 
 class Script
 {
@@ -23,8 +24,32 @@ class Script
         interp = new Interp(name ?? (isFile ? path : Config.INTERP_NAME));
     }
 
+    public var lexerTime:Float = 0;
+    public var parserTime:Float = 0;
+    public var interpTime:Float = 0;
+
     public function execute():Dynamic
-        return interp.execute(new Parser(new Lexer(content).tokenize()).parse());
+    {
+        var time:Float = Timer.stamp();
+        
+        final tokens = new Lexer(content).tokenize();
+
+        lexerTime = Timer.stamp() - time;
+
+        time = Timer.stamp();
+
+        final expr = new Parser(tokens).parse();
+
+        parserTime = Timer.stamp() - time;
+
+        time = Timer.stamp();
+
+        final result = interp.execute(expr);
+
+        interpTime = Timer.stamp() - time;
+
+        return result;
+    }
 
     public function safeExecute():Dynamic
     {

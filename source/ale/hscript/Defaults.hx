@@ -40,5 +40,4 @@ class Defaults
     public static final INTERP_NAME:String = 'ALEHScript.hx';
 
     public static final ERROR_HANDLER:String -> Void = (e) -> Sys.println('[ ERROR ] ' + e);
-    public static final BENCHMARK_HANDLER:String -> Float -> Void = (title, time) -> Sys.println('[ BENCHMARK ] ' + title + ': ' + (time * 1000) + ' ms');
 }
