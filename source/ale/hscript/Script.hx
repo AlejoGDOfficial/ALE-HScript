@@ -15,7 +15,7 @@ class Script
     {
         final path:String = Config.SCRIPT_PATH + script + Config.SCRIPT_EXTENSION;
 
-        final isFile:Bool = Config.FILE_CHECKER(path);
+        final isFile:Bool = Config.FILE_CHECKER != null && Config.FILE_CHECKER(path);
 
         content = isFile ? Config.FILE_READER(path) : script;
 
@@ -25,8 +25,6 @@ class Script
     public function execute():Dynamic
     {
         final tokens = new Lexer(content).tokenize();
-
-        trace(tokens);
 
         final expr = new Parser(tokens).parse();
 

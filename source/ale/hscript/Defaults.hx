@@ -1,12 +1,14 @@
 package ale.hscript;
 
+#if sys
 import sys.FileSystem;
 import sys.io.File;
+#end
 
 class Defaults
 {
-    public static var FILE_CHECKER:String -> Bool = FileSystem.exists;
-    public static var FILE_READER:String -> String = File.getContent;
+    public static var FILE_CHECKER:String -> Bool #if sys = FileSystem.exists #end ;
+    public static var FILE_READER:String -> String #if sys = File.getContent #end ;
 
     public static final IMPORTS:Array<Class<Dynamic>> = [
         Array,
