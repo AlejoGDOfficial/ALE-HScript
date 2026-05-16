@@ -56,6 +56,9 @@ class Parser
     {
         return switch (peek())
         {
+            case TImport:
+                parseImport();
+
             case TVar, TFinal:
                 parseVar();
 
@@ -95,6 +98,37 @@ class Parser
 
                 null;
         }
+    }
+
+    function parseImport():Expr
+    {
+        advance();
+
+        final type:Expr = parseType();
+
+        final nick:String = switch (peek())
+        {
+            case TAs:
+                advance();
+
+                switch (advance())
+                {
+                    case TIdent(n):
+                        n;
+
+                    default:
+                        error();
+
+                        null;
+                }
+
+            default:
+                null;
+        }
+
+        expect(TSemicolon);
+
+        return EImport(type, nick);
     }
 
     function parseVar():Expr

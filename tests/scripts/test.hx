@@ -1,3 +1,5 @@
+import haxe.ds.StringMap as OsoMap;
+
 final oso:String = 'oso';
 
 trace('donde');
@@ -9,7 +11,7 @@ function oso(?val:Float = 10):String
 
 oso();
 
-var map:haxe.ds.StringMap = new haxe.ds.StringMap<String>();
+var map:OsoMap = new StringMap<String>();
 
 map.set('oso', 'donde');
 

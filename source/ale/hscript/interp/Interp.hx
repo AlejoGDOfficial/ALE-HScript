@@ -54,6 +54,18 @@ class Interp
 
                 result;
 
+            case EImport(cls, nick):
+                scope.define(nick ?? switch (cls)
+                {
+                    case EIdent(id):
+                        id[id.length - 1];
+
+                    default:
+                        null;
+                }, execute(cls));
+
+                null;
+
             case EVar(name, value):
                 final value = execute(value);
 
