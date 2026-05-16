@@ -1,43 +1,47 @@
 package ale.hscript;
 
-import haxe.Exception;
+import ale.hscript.lexer.Lexer;
+import ale.hscript.parser.Parser;
 
-import ale.hscript.Types.Expr;
-import ale.hscript.Types.Stmt;
+import haxe.Exception;
 
 class Script
 {
-    public var interp:Interp;
-    public var lexerClass:Class<Lexer>;
-    public var parserClass:Class<Parser>;
+    public final name:String;
 
-    public function new(?interp:Interp, ?lexerClass:Class<Lexer>, ?parserClass:Class<Parser>)
+    public final content:String;
+
+    public function new(?script:String)
     {
-        this.interp = interp ?? new Interp();
-        this.lexerClass = lexerClass ?? Lexer;
-        this.parserClass = parserClass ?? Parser;
+        final path:String = Config.SCRIPT_PATH + script + Config.SCRIPT_EXTENSION;
+
+        final isFile:Bool = Config.FILE_CHECKER(path);
+
+        content = isFile ? Config.FILE_READER(path) : script;
+
+        name = isFile ? path : Config.INTERP_NAME;
     }
 
-    public function execute(content:String):Dynamic
+    public function execute():Dynamic
     {
-        final lexer:Lexer = Type.createInstance(lexerClass, []);
-        lexer.content = content;
+        final tokens = new Lexer(content).tokenize();
 
-        final parser:Parser = Type.createInstance(parserClass, []);
-        parser.tokens = lexer.tokenize();
+        trace(tokens);
 
-        final statements:Stmt = parser.parse();
+        final expr = new Parser(tokens).parse();
 
-        return interp.execute(statements);
+        trace(expr);
+
+        return null;
     }
 
-    public function safeExecution(content:String):Dynamic
+    public function safeExecute():Dynamic
     {
         try
         {
-            return execute(content);
-        } catch(e:Exception) {
-            trace('Script Exception: ' + e);
+            return execute();
+        } catch(error:Exception) {
+            Config.ERROR_HANDLER(name + ': ' + error.message);
         }
 
         return null;

@@ -1,4 +1,4 @@
-package ale.hscript;
+package ale.hscript.interp;
 
 class Scope
 {

@@ -6,7 +6,7 @@ class Main
 {
 	static function main()
 	{
-		final script:Script = new Script();
-		script.execute(sys.io.File.getContent('test.hx'));
+		final script:Script = new Script('test');
+		script.execute();
 	}
 }
