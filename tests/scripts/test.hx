@@ -1,3 +1,4 @@
-var oso:Int = 10;
+function oso():Dynamic
+    return 'oso';
 
-trace(oso++);
+trace(oso());

@@ -1,5 +1,6 @@
 package ale.hscript.parser;
 
+import ale.hscript.lexer.TokenUtil;
 import ale.hscript.lexer.Token;
 
 class Parser
@@ -77,6 +78,13 @@ class Parser
 
             case TNull:
                 ENull;
+
+            case TReturn:
+                final res = parseExpr();
+
+                expect(TSemicolon);
+
+                EReturn(res);
 
             case TPackage:
                 var result:String = '';
@@ -290,7 +298,18 @@ class Parser
 
     function parsePostfix(left:Expr):Expr
     {
-        return switch (peek())
+        final cur:Token = peek();
+
+        if (TokenUtil.binOps.contains(cur))
+        {
+            final op = advance();
+
+            final right = parseExpr(getPrecedence(op));
+
+            return EBinOp(left, op, right);
+        }
+
+        return switch (cur)
         {
             case TLeftParen:
                 ECall(left, parseArguments());
@@ -312,13 +331,6 @@ class Parser
                         null;
                 }
 
-            case TPlus, TMinus, TStar, TSlash, TPercent, TDoubleEqual, TExclamationEqual, TLess, TGreater, TLessEqual, TGreaterEqual, TDoubleAmpersand, TDoublePipe, TAmpersand, TPipe, TCaret, TDoubleLess, TDoubleGreater, TTripleGreater:
-                final op = advance();
-
-                final right = parseExpr(getPrecedence(op));
-
-                EBinOp(left, op, right);
-
             case TDoublePlus, TDoubleMinus:
                 EPostfix(left, advance());
 
@@ -331,17 +343,24 @@ class Parser
     {
         final result:Array<Expr> = [];
 
-        expect(TLeftBrace);
-
-        while (!isEnd() && peek() != TRightBrace)
+        switch (peek())
         {
-            final res:Expr = parseExpr();
+            case TLeftBrace:
+                expect(TLeftBrace);
 
-            if (res != null)
-                result.push(res);
+                while (!isEnd() && peek() != TRightBrace)
+                {
+                    final res:Expr = parseExpr();
+
+                    if (res != null)
+                        result.push(res);
+                }
+
+                expect(TRightBrace);
+
+            default:
+                result.push(parseExpr());
         }
-
-        expect(TRightBrace);
 
         return EBlock(result);
     }

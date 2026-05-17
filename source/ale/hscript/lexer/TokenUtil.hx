@@ -3,17 +3,9 @@ package ale.hscript.lexer;
 class TokenUtil
 {
     public static final symbolFromString:Map<String, Token> = [
-        '*' => TStar,
-        '/' => TSlash,
-        '%' => TPercent,
-
         '>' => TGreater,
         '<' => TLess,
 
-        '&' => TAmpersand,
-        '|' => TPipe,
-
-        '^' => TCaret,
         '~' => TTilde,
 
         '(' => TLeftParen,
@@ -68,5 +60,120 @@ class TokenUtil
         'package' => TPackage,
         'import' => TImport,
         'as' => TAs
+    ];
+
+    public static final ops:Array<Token> = [
+        TPlus,
+        TMinus,
+        TStar,
+        TSlash,
+        TPercent,
+
+        TEqual,
+        TDoubleEqual,
+        TNotEqual,
+        TExclamationEqual,
+
+        TGreater,
+        TLess,
+        TGreaterEqual,
+        TLessEqual,
+
+        TAmpersand,
+        TDoubleAmpersand,
+
+        TPipe,
+        TDoublePipe,
+
+        TCaret,
+        TTilde,
+        TExclamation,
+
+        TDoubleLess,
+        TDoubleGreater,
+        TTripleGreater,
+
+        TPlusEqual,
+        TMinusEqual,
+        TStarEqual,
+        TSlashEqual,
+        TPercentEqual,
+
+        TAmpersandEqual,
+        TPipeEqual,
+        TCaretEqual,
+
+        TDoubleLessEqual,
+        TDoubleGreaterEqual,
+        TTripleGreaterEqual,
+
+        TDoublePlus,
+        TDoubleMinus,
+
+        TDoubleQuestion,
+        TQuestionDot,
+
+        TArrow
+    ];
+
+    public static final binOps:Array<Token> = [
+        TPlus,
+        TMinus,
+        TStar,
+        TSlash,
+        TPercent,
+
+        TDoubleEqual,
+        TNotEqual,
+        TExclamationEqual,
+
+        TGreater,
+        TLess,
+        TGreaterEqual,
+        TLessEqual,
+
+        TAmpersand,
+        TDoubleAmpersand,
+
+        TPipe,
+        TDoublePipe,
+
+        TCaret,
+
+        TDoubleLess,
+        TDoubleGreater,
+        TTripleGreater,
+
+        TDoubleQuestion,
+        
+        TPlusEqual,
+        TMinusEqual,
+        TStarEqual,
+        TSlashEqual,
+        TPercentEqual,
+
+        TAmpersandEqual,
+        TPipeEqual,
+        TCaretEqual,
+
+        TDoubleLessEqual,
+        TDoubleGreaterEqual,
+        TTripleGreaterEqual
+    ];
+
+    public static final assignOps:Array<Token> = [
+        TPlusEqual,
+        TMinusEqual,
+        TStarEqual,
+        TSlashEqual,
+        TPercentEqual,
+
+        TAmpersandEqual,
+        TPipeEqual,
+        TCaretEqual,
+
+        TDoubleLessEqual,
+        TDoubleGreaterEqual,
+        TTripleGreaterEqual
     ];
 }

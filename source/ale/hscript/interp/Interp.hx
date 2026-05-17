@@ -1,9 +1,18 @@
 package ale.hscript.interp;
 
 import ale.hscript.parser.Expr;
+
+import ale.hscript.lexer.TokenUtil;
 import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
+
+class Oso
+{
+    public var oso:Float = 0;
+
+    public function new() {}
+}
 
 class Interp
 {
@@ -129,23 +138,24 @@ class Interp
 
             case EBinOp(left, op, right):
                 final l = execute(left);
+
                 final r = execute(right);
 
                 if (l == null || r == null)
                     return null;
 
-                untyped switch (op)
+                final result = untyped switch (op)
                 {
-                    case TPlus:
+                    case TPlus, TPlusEqual:
                         l + r;
 
-                    case TStar:
+                    case TStar, TStarEqual:
                         l * r;
 
-                    case TSlash:
+                    case TSlash, TSlashEqual:
                         l / r;
 
-                    case TPercent:
+                    case TPercent, TPercentEqual:
                         l % r;
 
                     case TDoubleEqual:
@@ -172,27 +182,43 @@ class Interp
                     case TDoublePipe:
                         l || r;
 
-                    case TAmpersand:
+                    case TAmpersand, TAmpersandEqual:
                         l & r;
 
-                    case TPipe:
+                    case TPipe, TPipeEqual:
                         l | r;
 
-                    case TCaret:
+                    case TCaret, TCaretEqual:
                         l ^ r;
 
-                    case TDoubleLess:
+                    case TDoubleLess, TDoubleLessEqual:
                         l << r;
 
-                    case TDoubleGreater:
+                    case TDoubleGreater, TDoubleGreaterEqual:
                         l >> r;
 
-                    case TTripleGreater:
+                    case TTripleGreater, TTripleGreaterEqual:
                         l >>> r;
 
                     default:
                         null;
                 }
+
+                if (TokenUtil.assignOps.contains(op))
+                {
+                    switch (left)
+                    {
+                        case EVarRef(name):
+                            scope.set(name, result);
+
+                        case EField(obj, name):
+                            Reflect.setProperty(execute(obj), name, result);
+
+                        default:
+                    }
+                }
+
+                result;
 
             case EPrefix(op, right):
                 final r = execute(right);
