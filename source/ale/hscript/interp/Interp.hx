@@ -7,13 +7,6 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
-class Oso
-{
-    public var oso:Float = 0;
-
-    public function new() {}
-}
-
 class Interp
 {
     public final name:String;
