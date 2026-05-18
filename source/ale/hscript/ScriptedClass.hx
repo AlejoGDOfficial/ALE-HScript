@@ -11,6 +11,8 @@ using StringTools;
 
 class ScriptedClass
 {
+    public final path:String;
+
     public final name:String;
 
     public final content:String;
@@ -19,6 +21,8 @@ class ScriptedClass
 
     public function new(path:String)
     {
+        this.path = path;
+
         name = Config.MODULE_PATH + path.replace('.', '/') + Config.MODULE_EXTENSION;
 
         content = Config.FILE_READER(name);

@@ -1,4 +1,4 @@
-package;
+package pack;
 
 class Oso
 {
