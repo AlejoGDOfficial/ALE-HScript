@@ -12,6 +12,8 @@ import ale.hscript.Config;
 
 import ale.hscript.classes.ScriptedInstance;
 
+import haxe.Constraints.IMap;
+
 using StringTools;
 
 class Interp
@@ -109,6 +111,16 @@ class Interp
 
             case ECall(obj, args):
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
+
+            case EArrayAccess(obj, value):
+                final obj = execute(obj);
+                
+                if (obj is Array || obj is ArrayAccess)
+                    obj[execute(value)];
+                else if (Std.isOfType(obj, IMap))
+                    cast(obj, IMap<Dynamic, Dynamic>).get(execute(value));
+                else
+                    null;
 
             case EVar(name, value):
                 scope.define(name, execute(value));

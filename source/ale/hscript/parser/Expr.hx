@@ -36,6 +36,7 @@ enum Expr
     EPostfix(left:Expr, op:Token);
 
     ECall(obj:Expr, args:Array<Expr>);
+    EArrayAccess(obj:Expr, value:Expr);
 
     EImport(path:String, wildcard:Bool, ?nick:String);
     EPackage(pack:String);

@@ -1,2 +1,2 @@
 
-trace('oso'.length);
+trace(['oso' => 'donde']['oso']);

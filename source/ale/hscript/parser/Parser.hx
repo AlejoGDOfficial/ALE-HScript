@@ -410,6 +410,15 @@ class Parser
             case TLeftParen:
                 ECall(left, parseArguments());
 
+            case TLeftBracket:
+                advance();
+
+                final val:Expr = parseExpr();
+
+                expect(TRightBracket);
+
+                EArrayAccess(left, val);
+
             case TEqual:
                 advance();
 
@@ -440,7 +449,7 @@ class Parser
 
                         default:
                             error();
-                            
+
                             null;
                     }
                 );
@@ -685,7 +694,7 @@ class Parser
             case TExclamation, TDoublePlus, TDoubleMinus:
                 UNARY;
 
-            case TLeftParen:
+            case TLeftParen, TLeftBracket:
                 CALL;
 
             case TDot:
