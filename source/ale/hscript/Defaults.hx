@@ -26,7 +26,7 @@ class Defaults
         Type,
         StringBuf,
         StringTools,
-        Sys,
+        #if sys Sys, #end
         Xml
     ];
     public static final ABSTRACTS:Array<String> = [];
