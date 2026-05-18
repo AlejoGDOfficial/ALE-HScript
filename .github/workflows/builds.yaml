@@ -43,6 +43,7 @@ jobs:
           haxelib dev ale-hscript .
           ${{ matrix.dependencies }}
 
+      - name: Build
         run: |
           cd tests
           haxe build.hxml -D VERBOSE_TEST ${{ matrix.build_postfix }}
