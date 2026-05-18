@@ -96,6 +96,9 @@ class Lexer
                 if (match('='))
                     return TDoubleEqual;
 
+                if (match('>'))
+                    return TMapArrow;
+
                 return TEqual;
 
             case '+'.code:

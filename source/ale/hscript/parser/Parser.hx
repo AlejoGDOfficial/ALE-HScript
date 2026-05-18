@@ -64,6 +64,97 @@ class Parser
     {
         return switch (advance())
         {
+            case TLeftBracket:
+                final values:Array<Expr> = [];
+
+                final mapValues:Map<Expr, Expr> = [];
+
+                var mapForm:Null<Bool> = null;
+
+                var shouldContinue:Bool = peek() != TRightBrace;
+
+                while (!isEnd() && shouldContinue)
+                {
+                    final nextExpr = parseExpr();
+
+                    if (mapForm == null)
+                    {
+                        switch (peek())
+                        {
+                            case TComma:
+                                mapForm = false;
+
+                            case TMapArrow:
+                                mapForm = true;
+
+                            case TRightBracket:
+
+                            default:
+                                error();
+
+                                null;
+                        }
+                    }
+
+                    if (!mapForm)
+                        values.push(nextExpr);
+
+                    shouldContinue = switch (peek())
+                    {
+                        case TComma:
+                            advance();
+
+                            if (mapForm)
+                            {
+                                error();
+
+                                false;
+                            } else {
+                                true;
+                            }
+
+                        case TMapArrow:
+                            advance();
+                            
+                            if (mapForm)
+                            {
+                                mapValues.set(nextExpr, parseExpr());
+
+                                switch (peek())
+                                {
+                                    case TComma:
+                                        advance();
+
+                                        true;
+
+                                    case TRightBracket:
+                                        false;
+
+                                    default:
+                                        error();
+
+                                        false;
+                                }
+                            } else {
+                                error();
+
+                                false;
+                            }
+
+                        case TRightBracket:
+                            false;
+
+                        default:
+                            error();
+
+                            false;
+                    }
+                }
+
+                expect(TRightBracket);
+
+                mapForm ? EMap(mapValues) : EArray(values);
+            
             case TNumber(val):
                 ENumber(val);
 
@@ -492,7 +583,24 @@ class Parser
             case TLess:
                 advance();
 
-                parseType();
+                while (!isEnd() && peek() != TGreater)
+                {
+                    parseType();
+
+                    switch (peek())
+                    {
+                        case TComma:
+                            advance();
+
+                        case TGreater:
+                            break;
+
+                        default:
+                            error();
+
+                            null;
+                    }
+                }
 
                 expect(TGreater);
 

@@ -255,6 +255,17 @@ class Interp
             case EString(value):
                 value;
 
+            case EArray(values):
+                [for (val in values) execute(val)];
+
+            case EMap(value):
+                final result:Map<Dynamic, Dynamic> = new Map<Dynamic, Dynamic>();
+
+                for (key in value.keys())
+                    result.set(execute(key), execute(value[key]));
+
+                result;
+
             case EReturn(value):
                 throw new ReturnSignal(execute(value));
 

@@ -1,7 +1,15 @@
-import pack.Oso;
+final osoArray:Array<String> = [
+    'oso',
+    'tengo',
+    'hambre',
+    'oso'
+];
 
-var oso = new Oso(100);
+final osoMap:Map<String, Bool> = [
+    'oso' => true,
+    'donde' => false,
+    'tu' => true,
+    'ta' => false
+];
 
-oso.val = 10;
-
-trace(oso.oso() + ' | ' + oso.val + ' | ' + oso);
+trace(osoArray + ' | ' + osoMap);

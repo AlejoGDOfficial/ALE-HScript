@@ -62,6 +62,7 @@ enum Token
     TQuestionDot;
 
     TArrow;
+    TMapArrow;
 
     TLeftParen;
     TRightParen;

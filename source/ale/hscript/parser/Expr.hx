@@ -15,6 +15,9 @@ enum Expr
     EFalse;
     ENull;
 
+    EMap(value:Map<Expr, Expr>);
+    EArray(values:Array<Expr>);
+
     EVar(name:String, value:Expr);
 
     EField(obj:Expr, name:String);
