@@ -9,6 +9,17 @@ jobs:
     name: Build (${{ matrix.platform }})
 
     runs-on: ubuntu-latest
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -25,6 +36,14 @@ jobs:
             dependencies: 
             build_postfix: --hl bin\bin.hl -cmd "hl bin\bin.hl"
 
+          - platform: Lua
+            dependencies: haxelib install hxluajit
+            build_postfix: --lua bin/bin.lua --cmd "luajit bin/bin.lua"
+
+          - platform: JS
+            dependencies: 
+            build_postfix: --js bin/bin.js --cmd "node bin/bin.js"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -38,6 +57,10 @@ jobs:
         uses: cedx/SetupHashLink@v8
         with:
           version: latest
+
+      - name: Setup LuaJIT
+        if: matrix.platform == 'Lua'
+        run: sudo apt-get install -y luajit
 
       - name: Install Dependencies
         run: |
