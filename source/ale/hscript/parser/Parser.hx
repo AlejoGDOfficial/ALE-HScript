@@ -12,11 +12,14 @@ class Parser
 
     var index:Int = 0;
 
+    function peekLast():Token
+        return tokens[index - 1];
+
     function peek():Token
         return tokens[index];
 
-    function peekLast():Token
-        return tokens[index - 1];
+    function peekNext():Token
+        return tokens[index + 1];
 
     function advance():Token
         return tokens[index++];
@@ -298,76 +301,103 @@ class Parser
                 EVar(name, value);
 
             case TIdent(name):
-                var pathVer:String = name;
-
-                var result:Expr = EField(null, name);
-
-                var shouldContinue:Bool = peek() == TDot;
-
-                while (!isEnd() && shouldContinue)
+                switch (peek())
                 {
-                    advance();
+                    case TArrow:
+                        advance();
 
-                    switch (advance())
-                    {
-                        case TIdent(n):
-                            if (pathVer != null)
-                                pathVer += (pathVer.length > 0 ? '.' : '') + n;
-                        
-                            result = EField(result, n);
+                        EFunction(null, [{name: name}], parseBlock());
 
-                        default:
-                            error();
+                    default:
+                        var pathVer:String = name;
 
-                            null;
-                    }
+                        var result:Expr = EField(null, name);
 
-                    if (pathVer != null)
-                    {
-                        final type = Type.resolveClass(pathVer);
+                        var shouldContinue:Bool = peek() == TDot;
 
-                        if (type != null)
+                        while (!isEnd() && shouldContinue)
                         {
-                            result = EType(pathVer);
+                            advance();
 
-                            pathVer = null;
+                            switch (advance())
+                            {
+                                case TIdent(n):
+                                    if (pathVer != null)
+                                        pathVer += (pathVer.length > 0 ? '.' : '') + n;
+                                
+                                    result = EField(result, n);
+
+                                default:
+                                    error();
+
+                                    null;
+                            }
+
+                            if (pathVer != null)
+                            {
+                                final type = Type.resolveClass(pathVer);
+
+                                if (type != null)
+                                {
+                                    result = EType(pathVer);
+
+                                    pathVer = null;
+                                }
+                            }
+
+                            shouldContinue = switch (peek())
+                            {
+                                case TDot:
+                                    true;
+
+                                default:
+                                    false;
+                            }
                         }
-                    }
 
-                    shouldContinue = switch (peek())
-                    {
-                        case TDot:
-                            true;
-
-                        default:
-                            false;
-                    }
+                        result;
                 }
-
-                result;
-
             case TLeftParen:
-                final result = parseExpr();
+                index--;
 
-                expect(TRightParen);
+                final start = index;
 
-                result;
+                try
+                {
+                    final args:Array<FunctionArgument> = parseFunctionArguments();
+
+                    expect(TArrow);
+
+                    EFunction(null, args, parseBlock());
+                } catch(_) {
+                    index = start;
+
+                    expect(TLeftParen);
+
+                    final result:Expr = parseExpr();
+
+                    expect(TRightParen);
+
+                    result;
+                }
             
             case TExclamation, TDoublePlus, TDoubleMinus, TMinus:
                 EPrefix(peekLast(), parseExpr(UNARY));
 
             case TFunction:
-                final name = switch (advance())
+                final name = switch (peek())
                 {
                     case TIdent(n):
+                        advance();
+
                         n;
 
                     case TNew:
+                        advance();
+
                         'new';
 
                     default:
-                        error();
-
                         null;
                 }
 

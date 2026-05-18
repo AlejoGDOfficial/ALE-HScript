@@ -128,7 +128,7 @@ class Interp
                 scope.define(name, execute(value));
 
             case EFunction(name, args, block):
-                scope.define(name, Reflect.makeVarArgs(
+                final func = Reflect.makeVarArgs(
                     (params:Array<Dynamic>) -> {
                         final newScope:Scope = new Scope(scope);
 
@@ -137,9 +137,16 @@ class Interp
 
                         execute(block, newScope);
                     }
-                ));
+                );
 
-                null;
+                if (name == null)
+                {
+                    func;
+                } else {
+                    scope.define(name, func);
+
+                    null;
+                }
 
             case EType(module):
                 resolveClass(module) ?? resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
