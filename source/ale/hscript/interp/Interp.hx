@@ -95,24 +95,23 @@ class Interp
 
                 result;
 
-            case ESet(name, value):
-                scope.set(name, execute(value));
+            case EField(left, field):
+                getProperty(left == null ? null : execute(left), field);
 
-            case ESetField(obj, name, value):
-                final val = execute(value);
-            
-                setProperty(execute(obj), name, val);
-
-                val;
+            case ESet(obj, value, returnNew):
+                switch (obj)
+                {
+                    case EField(left, field):
+                        setProperty(left == null ? null : execute(left), field, value, returnNew);
+                    default:
+                        null;
+                }
 
             case ECall(obj, args):
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
 
             case EVar(name, value):
                 scope.define(name, execute(value));
-
-            case EVarRef(name):
-                scope.get(name);
 
             case EFunction(name, args, block):
                 scope.define(name, Reflect.makeVarArgs(
@@ -131,9 +130,6 @@ class Interp
             case EType(module):
                 resolveClass(module) ?? resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
 
-            case EField(obj, field):
-                getProperty(execute(obj), field);
-
             case EBinOp(left, op, right):
                 final l = execute(left);
 
@@ -142,7 +138,7 @@ class Interp
                 if (l == null || r == null)
                     return null;
 
-                final result = untyped switch (op)
+                untyped switch (op)
                 {
                     case TPlus, TPlusEqual:
                         l + r;
@@ -202,24 +198,8 @@ class Interp
                         null;
                 }
 
-                if (TokenUtil.assignOps.contains(op))
-                {
-                    switch (left)
-                    {
-                        case EVarRef(name):
-                            scope.set(name, result);
-
-                        case EField(obj, name):
-                            setProperty(execute(obj), name, result);
-
-                        default:
-                    }
-                }
-
-                result;
-
             case EPrefix(op, right):
-                final r = execute(right);
+                final r:Dynamic = execute(right);
 
                 if (r == null)
                     return null;
@@ -232,26 +212,11 @@ class Interp
                     case TMinus:
                         -r;
 
-                    case TDoublePlus, TDoubleMinus:
-                        final func:Float -> Float = (val) -> val + (op == TDoubleMinus ? -1 : 1);
-
-                        switch (right)
-                        {
-                            case EVarRef(name):
-                                scope.set(name, func(scope.get(name)));
-
-                            case EField(obj, name):
-                                final obj = execute(obj);
-
-                                final val = func(Reflect.getProperty(obj, name));
-
-                                setProperty(obj, name, val);
-
-                                val;
-
-                            default:
-                                null;
-                        }
+                    case TDoublePlus:
+                        r + 1;
+                        
+                    case TDoubleMinus:
+                        r - 1;
 
                     default:
                         null;
@@ -265,30 +230,11 @@ class Interp
 
                 untyped switch (op)
                 {
-                    case TDoublePlus, TDoubleMinus:
-                        final func:Float -> Float = (val) -> val + (op == TDoubleMinus ? -1 : 1);
+                    case TDoublePlus:
+                        l + 1;
 
-                        switch (left)
-                        {
-                            case EVarRef(name):
-                                final oldVal = scope.get(name);
-
-                                scope.set(name, func(oldVal));
-
-                                oldVal;
-
-                            case EField(obj, name):
-                                final obj = execute(obj);
-
-                                final oldVal = Reflect.getProperty(obj, name);
-
-                                setProperty(obj, name, func(oldVal));
-
-                                oldVal;
-
-                            default:
-                                null;
-                        }
+                    case TDoubleMinus:
+                        l - 1;
 
                     default:
                         null;
@@ -317,16 +263,27 @@ class Interp
         }
     }
 
-    function setProperty(obj:Dynamic, field:String, value:Dynamic)
+    function setProperty(obj:Dynamic, field:String, value:Expr, ?returnNew:Bool = true):Dynamic
     {
-        if (obj is ScriptedInstance)
-            return obj.interp.scope.set(field, value);
+        final oldValue:Dynamic = getProperty(obj, field);
 
-        return Reflect.setProperty(obj, field, value);
+        final newValue:Dynamic = execute(value);
+
+        if (obj == null)
+            scope.set(field, newValue);
+        else if (obj is ScriptedInstance)
+            obj.interp.scope.set(field, newValue);
+        else
+            Reflect.setProperty(obj, field, newValue);
+
+        return returnNew ? newValue : oldValue;
     }
 
     function getProperty(obj:Dynamic, field:String):Dynamic
     {
+        if (obj == null)
+            return scope.get(field);
+
         if (obj is ScriptedInstance)
             return obj.interp.scope.get(field);
 

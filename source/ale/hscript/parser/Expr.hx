@@ -16,7 +16,7 @@ enum Expr
     ENull;
 
     EVar(name:String, value:Expr);
-    EVarRef(name:String);
+
     EField(obj:Expr, name:String);
 
     ENew(type:Expr, args:Array<Expr>);
@@ -25,8 +25,7 @@ enum Expr
 
     EBlock(exprs:Array<Expr>);
 
-    ESet(name:String, value:Expr);
-    ESetField(obj:Expr, name:String, value:Expr);
+    ESet(obj:Expr, value:Expr, ?returnNew:Bool);
 
     EBinOp(left:Expr, op:Token, right:Expr);
     EPrefix(op:Token, right:Expr);

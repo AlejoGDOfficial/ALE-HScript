@@ -211,7 +211,7 @@ class Parser
             case TIdent(name):
                 var pathVer:String = name;
 
-                var result:Expr = EVarRef(name);
+                var result:Expr = EField(null, name);
 
                 var shouldContinue:Bool = peek() == TDot;
 
@@ -311,7 +311,9 @@ class Parser
 
             final right = parseExpr(getPrecedence(op));
 
-            return EBinOp(left, op, right);
+            final binOp:Expr = EBinOp(left, op, right);
+
+            return TokenUtil.assignOps.contains(cur) ? ESet(left, binOp) : binOp;
         }
 
         return switch (cur)
@@ -322,22 +324,10 @@ class Parser
             case TEqual:
                 advance();
 
-                switch (left)
-                {
-                    case EVarRef(name):
-                        ESet(name, parseExpr());
-
-                    case EField(obj, field):
-                        ESetField(obj, field, parseExpr());
-
-                    default:
-                        error(true);
-
-                        null;
-                }
+                ESet(left, parseExpr());
 
             case TDoublePlus, TDoubleMinus:
-                EPostfix(left, advance());
+                ESet(left, EPostfix(left, advance()), false);
 
             default:
                 left;
