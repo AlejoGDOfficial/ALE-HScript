@@ -8,6 +8,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        include:
+          - platform: Interp
+            dependencies: 
+            build_postfix: --interp
+
+          - platform: C++
+            dependencies: haxelib git hxcpp https://github.com/ALE-Psych-Crew/hxcpp
+            build_postfix: --cpp bin --cmd .\bin\Main.exe
+
+          - platform: Hashlink
+            dependencies: 
+            build_postfix: --hl bin\bin.hl -cmd "hl bin\bin.hl"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,10 +31,17 @@ jobs:
         with:
           haxe-version: 4.3.7
 
-      - name: Install ale-hscript
-        run: haxelib dev ale-hscript .
+      - name: Setup HashLink
+        uses: CedX/SetupHashLink@master
+        with:
+          version: latest
 
-      - name: Build
+      - name: Install Dependencies
+        run: |
+          haxelib dev ale-hscript .
+          ${{ matrix.dependencies }}
+
+      - name: Build (${{ matrix.platform }})
         run: |
           cd tests
-          haxe build.hxml -D VERBOSE_TEST
+          haxe build.hxml -D VERBOSE_TEST ${{ matrix.build_postfix }}
