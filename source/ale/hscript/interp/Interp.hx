@@ -240,6 +240,12 @@ class Interp
                         null;
                 }
 
+            case ETernOp(condition, trueCase, falseCase):
+                if (execute(condition))
+                    execute(trueCase);
+                else
+                    execute(falseCase);
+
             case ENull:
                 null;
 

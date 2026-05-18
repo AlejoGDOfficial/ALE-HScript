@@ -31,6 +31,7 @@ enum Expr
     ESet(obj:Expr, value:Expr, ?returnNew:Bool);
 
     EBinOp(left:Expr, op:Token, right:Expr);
+    ETernOp(condition:Expr, trueCase:Expr, falseCase:Expr);
     EPrefix(op:Token, right:Expr);
     EPostfix(left:Expr, op:Token);
 

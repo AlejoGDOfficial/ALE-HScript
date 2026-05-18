@@ -418,6 +418,17 @@ class Parser
             case TDoublePlus, TDoubleMinus:
                 ESet(left, EPostfix(left, advance()), false);
 
+            case TQuestion:
+                advance();
+
+                final trueCase:Expr = parseExpr(TERNARY);
+
+                expect(TColon);
+
+                final falseCase:Expr = parseExpr(TERNARY);
+
+                ETernOp(left, trueCase, falseCase);
+
             default:
                 left;
         }

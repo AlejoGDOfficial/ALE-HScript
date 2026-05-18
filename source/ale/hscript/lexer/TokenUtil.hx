@@ -21,7 +21,6 @@ class TokenUtil
         ',' => TComma,
         ':' => TColon,
         ';' => TSemicolon,
-        '?' => TQuestion,
 
         '@' => TAt,
         '$' => TDollar

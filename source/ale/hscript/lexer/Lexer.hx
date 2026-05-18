@@ -86,6 +86,12 @@ class Lexer
     {
         switch (advance())
         {
+            case '?'.code:
+                if (match('.'))
+                    return TQuestionDot;
+
+                return TQuestion;
+
             case '!'.code:
                 if (match('='))
                     return TExclamationEqual;
