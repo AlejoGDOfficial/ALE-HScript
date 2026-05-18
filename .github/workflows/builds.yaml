@@ -9,17 +9,6 @@ jobs:
     name: Build (${{ matrix.platform }})
 
     runs-on: ubuntu-latest
-name: Build
-
-on:
-  push:
-  workflow_dispatch:
-
-jobs:
-  build:
-    name: Build (${{ matrix.platform }})
-
-    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -40,7 +29,7 @@ jobs:
             dependencies: haxelib install hxluajit
             build_postfix: --lua bin/bin.lua --cmd "luajit bin/bin.lua"
 
-          - platform: JS
+          - platform: javaScript
             dependencies: 
             build_postfix: --js bin/bin.js --cmd "node bin/bin.js"
 
