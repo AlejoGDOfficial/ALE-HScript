@@ -14,8 +14,6 @@ class ScriptedInstance
 
         interp.execute(cls.program);
 
-        trace(args);
-
         Reflect.callMethod(null, interp.scope.get('new'), args);
     }
 }
