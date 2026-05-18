@@ -7,6 +7,13 @@ import ale.hscript.lexer.Token;
 
 import ale.hscript.utils.TypeList;
 
+import ale.hscript.ScriptedClass;
+import ale.hscript.Config;
+
+import ale.hscript.classes.ScriptedInstance;
+
+using StringTools;
+
 class Interp
 {
     public final name:String;
@@ -30,8 +37,6 @@ class Interp
         return switch (expr)
         {
             case EProgram(stmts):
-                trace(stmts);
-
                 var result = null;
 
                 try
@@ -56,20 +61,20 @@ class Interp
                     {
                         for (cls in TypeList.list.get(module))
                         {
-                            final type = Type.resolveClass(module + '.' + cls);
+                            final type = resolveClass(module + '.' + cls);
 
                             if (type != null)
                                 scope.define(cls, type);
                         }
                     }
                 } else {
-                    scope.define(nick ?? module.split('.').pop(), Type.resolveClass(module));
+                    scope.define(nick ?? module.split('.').pop(), resolveClass(module));
                 }
 
                 null;
 
             case ENew(type, args):
-                Type.createInstance(execute(type), [for (arg in args) execute(arg)]);
+                createInstance(execute(type), [for (arg in args) execute(arg)]);
 
             case EBlock(stmts):
                 final previous:Scope = scope;
@@ -96,7 +101,7 @@ class Interp
             case ESetField(obj, name, value):
                 final val = execute(value);
             
-                Reflect.setProperty(execute(obj), name, val);
+                setProperty(execute(obj), name, val);
 
                 val;
 
@@ -124,10 +129,10 @@ class Interp
                 null;
 
             case EType(module):
-                Type.resolveClass(module) ?? Type.resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
+                resolveClass(module) ?? resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
 
             case EField(obj, field):
-                Reflect.getProperty(execute(obj), field);
+                getProperty(execute(obj), field);
 
             case EBinOp(left, op, right):
                 final l = execute(left);
@@ -205,7 +210,7 @@ class Interp
                             scope.set(name, result);
 
                         case EField(obj, name):
-                            Reflect.setProperty(execute(obj), name, result);
+                            setProperty(execute(obj), name, result);
 
                         default:
                     }
@@ -240,7 +245,7 @@ class Interp
 
                                 final val = func(Reflect.getProperty(obj, name));
 
-                                Reflect.setProperty(obj, name, val);
+                                setProperty(obj, name, val);
 
                                 val;
 
@@ -277,7 +282,7 @@ class Interp
 
                                 final oldVal = Reflect.getProperty(obj, name);
 
-                                Reflect.setProperty(obj, name, func(oldVal));
+                                setProperty(obj, name, func(oldVal));
 
                                 oldVal;
 
@@ -310,5 +315,39 @@ class Interp
             default:
                 null;
         }
+    }
+
+    function setProperty(obj:Dynamic, field:String, value:Dynamic)
+    {
+        if (obj is ScriptedInstance)
+            return obj.interp.scope.set(field, value);
+
+        return Reflect.setProperty(obj, field, value);
+    }
+
+    function getProperty(obj:Dynamic, field:String):Dynamic
+    {
+        if (obj is ScriptedInstance)
+            return obj.interp.scope.get(field);
+
+        return Reflect.getProperty(obj, field);
+    }
+
+    function resolveClass(path:String):Dynamic
+    {
+        if (Config.FILE_CHECKER(Config.MODULE_PATH + path.replace('.', '/') + Config.MODULE_EXTENSION))
+            return new ScriptedClass(path);
+
+        return Type.resolveClass(path);
+    }
+
+    function createInstance(cls:Dynamic, ?args:Array<Dynamic>):Class<Dynamic>
+    {
+        args ??= [];
+
+        if (cls is ScriptedClass)
+            return cls.instantiate(args);
+
+        return cls is Class ? Type.createInstance(cls, args) : null;
     }
 }

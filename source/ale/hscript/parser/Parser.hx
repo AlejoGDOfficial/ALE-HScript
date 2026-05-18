@@ -89,7 +89,7 @@ class Parser
             case TPackage:
                 var result:String = '';
 
-                var shouldContinue:Bool = true;
+                var shouldContinue:Bool = peek() != TSemicolon;
 
                 while (!isEnd() && shouldContinue)
                 {
@@ -204,6 +204,8 @@ class Parser
                         null;
                 }
 
+                expect(TSemicolon);
+
                 EVar(name, value);
 
             case TIdent(name):
@@ -270,6 +272,9 @@ class Parser
                 {
                     case TIdent(n):
                         n;
+
+                    case TNew:
+                        'new';
 
                     default:
                         error();
