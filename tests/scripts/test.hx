@@ -4,4 +4,4 @@ var oso = new Oso(100);
 
 oso.val = 10;
 
-trace(oso.oso());
+trace(oso.oso() + ' | ' + oso.val);
