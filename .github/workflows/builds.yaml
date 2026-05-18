@@ -29,7 +29,7 @@ jobs:
             dependencies: haxelib install hxluajit
             build_postfix: --lua bin/bin.lua --cmd "luajit bin/bin.lua"
 
-          - platform: javaScript
+          - platform: JavaScript
             dependencies: 
             build_postfix: --js bin/bin.js --cmd "node bin/bin.js"
 

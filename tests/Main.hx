@@ -2,6 +2,8 @@ package;
 
 import ale.hscript.Script;
 
+import haxe.Log;
+
 class Main
 {
 	static function main()
@@ -9,13 +11,13 @@ class Main
 		final script:Script = new Script('test');
 
 		#if VERBOSE_TEST
-		Sys.println('\n--- ALE HScript Test --- \n\n' + script.content + '\n\n---\n');
+		Log.trace('\n--- ALE HScript Test --- \n\n' + script.content + '\n\n---\n', null);
 		#end
 
 		script.execute();
 
 		#if VERBOSE_TEST
-		Sys.println('\n---\n\nLexer: ' + script.lexerTime + ' ms\nParser: ' + script.parserTime + ' ms\nInterp: ' + script.interpTime + ' ms\n');
+		Log.trace('\n---\n\nLexer: ' + script.lexerTime + ' ms\nParser: ' + script.parserTime + ' ms\nInterp: ' + script.interpTime + ' ms\n', null);
 		#end
 	}
 }

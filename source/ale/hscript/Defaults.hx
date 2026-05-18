@@ -41,5 +41,5 @@ class Defaults
 
     public static final INTERP_NAME:String = 'ALEHScript.hx';
 
-    public static final ERROR_HANDLER:String -> Void = (e) -> Log.trace('[ ERROR ] ' + e, {methodName: '', lineNumber: -1, fileName: 'ALE HScript', className: 'ALEHScript'});
+    public static final ERROR_HANDLER:String -> Void = (e) -> Log.trace('[ ERROR ] ' + e, null);
 }
