@@ -19,7 +19,7 @@ jobs:
 
           - platform: C++
             dependencies: haxelib git hxcpp https://github.com/ALE-Psych-Crew/hxcpp
-            build_postfix: --cpp bin --cmd .\bin\Main.exe
+            build_postfix: --cpp bin --cmd ./bin/Main
 
           - platform: Hashlink
             dependencies: 
