@@ -33,7 +33,7 @@ class Parser
 
     function expect(val:Token)
         if (advance() != val)
-            throw 'Expected Token: ' + val;
+            throw 'Expected Token: ' + val + ', got ' + peekLast();
 
     public function parse():Expr
     {
@@ -81,8 +81,6 @@ class Parser
 
             case TReturn:
                 final res = parseExpr();
-
-                expect(TSemicolon);
 
                 EReturn(res);
 
@@ -355,6 +353,8 @@ class Parser
 
             default:
                 result.push(parseExpr());
+
+                expect(TSemicolon);
         }
 
         return EBlock(result);
