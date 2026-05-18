@@ -71,7 +71,7 @@ class Parser
 
                 var mapForm:Null<Bool> = null;
 
-                var shouldContinue:Bool = peek() != TRightBrace;
+                var shouldContinue:Bool = peek() != TRightBracket;
 
                 while (!isEnd() && shouldContinue)
                 {
@@ -153,7 +153,7 @@ class Parser
 
                 expect(TRightBracket);
 
-                mapForm ? EMap(mapValues) : EArray(values);
+                mapForm == true ? EMap(mapValues) : EArray(values);
             
             case TNumber(val):
                 ENumber(val);

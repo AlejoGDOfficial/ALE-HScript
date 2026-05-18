@@ -14,6 +14,8 @@ import ale.hscript.classes.ScriptedInstance;
 
 import haxe.Constraints.IMap;
 
+import haxe.Log;
+
 using StringTools;
 
 class Interp
@@ -30,7 +32,7 @@ class Interp
 
         scope = new Scope();
 
-        scope.define('trace', (e) -> Sys.println(this.name + ': ' + e));
+        scope.define('trace', (e) -> Log.trace(e, {fileName: name, lineNumber: -1, className: name.split('/').pop(), methodName: ': '}));
         scope.define('Math', Math);
     }
 
@@ -113,12 +115,12 @@ class Interp
                 Reflect.callMethod(null, execute(obj), [for (arg in args) execute(arg)]);
 
             case EArrayAccess(obj, value):
-                final obj = execute(obj);
+                final newObj:Dynamic = execute(obj);
                 
-                if (obj is Array || obj is ArrayAccess)
-                    obj[execute(value)];
-                else if (Std.isOfType(obj, IMap))
-                    cast(obj, IMap<Dynamic, Dynamic>).get(execute(value));
+                if (newObj is Array)
+                    newObj[execute(value)];
+                else if (Std.isOfType(newObj, IMap))
+                    cast(newObj, IMap<Dynamic, Dynamic>).get(execute(value));
                 else
                     null;
 
@@ -143,9 +145,9 @@ class Interp
                 resolveClass(module) ?? resolveClass((scriptPackage == null ? '' : scriptPackage + '.') + module) ?? scope.get(module);
 
             case EBinOp(left, op, right):
-                final l = execute(left);
+                final l:Dynamic = execute(left);
 
-                final r = execute(right);
+                final r:Dynamic = execute(right);
 
                 if (l == null || r == null)
                     return null;
@@ -235,7 +237,7 @@ class Interp
                 }
 
             case EPostfix(left, op):
-                final l = execute(left);
+                final l:Dynamic = execute(left);
 
                 if (l == null)
                     return null;

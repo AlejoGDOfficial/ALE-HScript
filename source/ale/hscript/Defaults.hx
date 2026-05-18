@@ -5,10 +5,12 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
+import haxe.Log;
+
 class Defaults
 {
-    public static final FILE_CHECKER:String -> Bool #if sys = FileSystem.exists #end ;
-    public static final FILE_READER:String -> String #if sys = File.getContent #end ;
+    public static final FILE_CHECKER:String -> Bool = #if sys FileSystem.exists #else null #end ;
+    public static final FILE_READER:String -> String = #if sys File.getContent #else null #end ;
 
     public static final IMPORTS:Array<Class<Dynamic>> = [
         Array,
@@ -39,5 +41,5 @@ class Defaults
 
     public static final INTERP_NAME:String = 'ALEHScript.hx';
 
-    public static final ERROR_HANDLER:String -> Void = (e) -> Sys.println('[ ERROR ] ' + e);
+    public static final ERROR_HANDLER:String -> Void = (e) -> Log.trace('[ ERROR ] ' + e, {methodName: '', lineNumber: -1, fileName: 'ALE HScript', className: 'ALEHScript'});
 }
