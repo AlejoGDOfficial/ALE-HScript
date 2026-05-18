@@ -27,11 +27,11 @@ jobs:
 
           - platform: Lua
             dependencies: haxelib install hxluajit
-            build_postfix: --lua bin/bin.lua --cmd "luajit bin/bin.lua"
+            build_postfix: --lua bin/bin.lua
 
           - platform: JavaScript
             dependencies: 
-            build_postfix: --js bin/bin.js --cmd "node bin/bin.js"
+            build_postfix: --js bin/bin.js
 
     steps:
       - uses: actions/checkout@v4
@@ -46,10 +46,6 @@ jobs:
         uses: cedx/SetupHashLink@v8
         with:
           version: latest
-
-      - name: Setup LuaJIT
-        if: matrix.platform == 'Lua'
-        run: sudo apt-get install -y luajit
 
       - name: Install Dependencies
         run: |
