@@ -429,6 +429,22 @@ class Parser
 
                 ETernOp(left, trueCase, falseCase);
 
+            case TDot:
+                advance();
+
+                EField(left,
+                    switch (advance())
+                    {
+                        case TIdent(n):
+                            n;
+
+                        default:
+                            error();
+                            
+                            null;
+                    }
+                );
+
             default:
                 left;
         }
